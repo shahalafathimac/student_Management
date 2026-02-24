@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Principal Dashboard</h2>
+
+<p>Total Courses: {{ total_courses }}</p>
+<p>Total Users: {{ total_users }}</p>
+
+<a href="{% url 'manage_courses' %}">Manage Courses</a> |
+<a href="{% url 'manage_users' %}">Manage Users</a> |
+<a href="{% url 'approvals' %}">Approvals</a>
+
+{% endblock %}
