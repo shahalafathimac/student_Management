@@ -1,10 +1,140 @@
-{% extends 'base.html' %}
+{% extends "student/base.html" %}
+{% block title %}Dashboard | Student MS{% endblock %}
+
 {% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-<h3>Student Dashboard</h3>
+    <!-- TOP LEFT: Small Stat 1 -->
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-6">
+            <h3 class="text-gray-800 font-bold text-lg">Approved<br>Courses</h3>
+            <span class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+            </span>
+        </div>
+        <div class="flex items-end justify-between">
+            <span class="text-5xl font-extrabold text-black">{{ approved_count }}</span>
+            <span class="bg-[#B5FF9D] text-green-900 text-xs font-bold px-3 py-1 rounded-full">High</span>
+        </div>
+        <p class="text-xs text-gray-400 font-medium mt-4">Total courses successfully approved.</p>
+    </div>
 
-<p><strong>Username:</strong> {{ student.user.username }}</p>
-<p><strong>Age:</strong> {{ student.age }}</p>
-<p><strong>Course:</strong> {{ student.course }}</p>
+    <!-- TOP MIDDLE: Small Stat 2 -->
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-6">
+            <h3 class="text-gray-800 font-bold text-lg">Pending<br>Requests</h3>
+            <span class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </span>
+        </div>
+        <div class="flex items-end justify-between">
+            <span class="text-5xl font-extrabold text-black">{{ pending_count }}</span>
+            <span class="bg-[#FFD384] text-orange-900 text-xs font-bold px-3 py-1 rounded-full">Wait</span>
+        </div>
+        <p class="text-xs text-gray-400 font-medium mt-4">Awaiting administrative approval.</p>
+    </div>
 
-{% endblock %}
+    <!-- TOP RIGHT: Large Stat (Total Spent) -->
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-6">
+            <h3 class="text-gray-800 font-bold text-lg">Financial<br>Overview</h3>
+            <span class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full cursor-pointer">
+                Total Spent
+            </span>
+        </div>
+        
+        <div class="flex-1 flex flex-col justify-center items-center py-4">
+            <span class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Investment</span>
+            <span class="text-5xl font-extrabold text-black">₹{{ total_spent }}</span>
+        </div>
+        
+        <div class="flex items-center justify-between text-xs font-medium border-t border-gray-100 pt-4">
+            <span class="text-gray-400">Rejected Requests</span>
+            <span class="bg-[#FF9D9D] text-red-900 px-3 py-1 rounded-full font-bold">{{ rejected_count }}</span>
+        </div>
+    </div>
+
+    <!-- BOTTOM LEFT: Tasks/Approved List -->
+    <div class="lg:col-span-2 bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-black">My Courses</h2>
+            <button class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </button>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex space-x-3 mb-8">
+            <span class="bg-black text-white px-5 py-2 rounded-full text-sm font-bold cursor-pointer shadow-md">Approved</span>
+            <span class="bg-white border border-gray-200 text-gray-600 px-5 py-2 rounded-full text-sm font-bold cursor-pointer hover:bg-gray-50">All Courses</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto space-y-6">
+            {% if approved_courses %}
+                {% for course in approved_courses %}
+                <div class="group">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-base leading-tight">{{ course.name }}</h4>
+                            <p class="text-xs text-gray-400 font-medium mt-1">{{ course.department }}</p>
+                        </div>
+                        <span class="bg-[#70C3FF] text-blue-900 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                            Active
+                        </span>
+                    </div>
+                    <!-- Colorful visual bar matching the image style -->
+                    <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden flex">
+                        <div class="h-full bg-[#A3FF90] rounded-full" style="width: 100%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center text-gray-400 py-10 font-medium">
+                    No approved courses available yet.
+                </div>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'purchase_courses' %}" class="mt-6 w-full py-4 bg-black text-white rounded-2xl font-bold text-center hover:shadow-lg transition-all shadow-md">
+            Browse New Courses
+        </a>
+    </div>
+
+    <!-- BOTTOM RIGHT: My Schedule / Info -->
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold text-black">My Info</h2>
+            <span class="bg-black text-white text-xs font-bold px-4 py-2 rounded-full cursor-pointer">
+                Profile 
+            </span>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Row -->
+            <div class="grid grid-cols-3 gap-4 items-center border-b border-gray-100 pb-4">
+                <span class="col-span-1 text-sm font-bold text-gray-400">Name</span>
+                <span class="col-span-2 text-sm font-bold text-gray-900 flex items-center">
+                    <div class="w-6 h-6 rounded-full bg-orange-200 mr-3 flex items-center justify-center text-[10px]">{{ request.user.first_name|first }}</div>
+                    {{ request.user.first_name }}
+                </span>
+            </div>
+            <!-- Row -->
+            <div class="grid grid-cols-3 gap-4 items-center border-b border-gray-100 pb-4">
+                <span class="col-span-1 text-sm font-bold text-gray-400">Email</span>
+                <span class="col-span-2 text-sm font-bold text-gray-900 truncate">{{ request.user.email }}</span>
+            </div>
+            <!-- Row -->
+            <div class="grid grid-cols-3 gap-4 items-center border-b border-gray-100 pb-4">
+                <span class="col-span-1 text-sm font-bold text-gray-400">Dept</span>
+                <span class="col-span-2 text-sm font-bold text-gray-900">{{ request.user.student.department }}</span>
+            </div>
+            <!-- Row -->
+            <div class="grid grid-cols-3 gap-4 items-center">
+                <span class="col-span-1 text-sm font-bold text-gray-400">Age</span>
+                <span class="col-span-2 text-sm font-bold text-gray-900">{{ request.user.student.age }} y/o</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

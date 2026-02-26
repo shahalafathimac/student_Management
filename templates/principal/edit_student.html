@@ -1,0 +1,64 @@
+{% extends "principal/base.html" %}
+{% block title %}Edit Student{% endblock %}
+
+{% block content %}
+<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white max-w-2xl mx-auto">
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl font-extrabold text-black">Edit Student</h2>
+            <p class="text-sm text-gray-400 font-medium mt-1">Update student profile information.</p>
+        </div>
+        <a href="{% url 'manage_students' %}"
+           class="border border-gray-200 text-gray-500 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+            Cancel
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for msg in messages %}
+        <div class="text-sm px-4 py-3 rounded-xl font-medium
+            {% if msg.tags == 'success' %}bg-[#B5FF9D]/30 text-green-900
+            {% else %}bg-red-50 text-red-700{% endif %}">
+            {{ msg }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}"
+                   class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                {{ field.label }}
+            </label>
+            <div class="[&>input]:w-full [&>input]:border [&>input]:border-gray-200
+                        [&>input]:rounded-xl [&>input]:px-4 [&>input]:py-2.5
+                        [&>input]:text-sm [&>input]:focus:outline-none
+                        [&>input]:focus:ring-2 [&>input]:focus:ring-black/10
+                        [&>select]:w-full [&>select]:border [&>select]:border-gray-200
+                        [&>select]:rounded-xl [&>select]:px-4 [&>select]:py-2.5
+                        [&>select]:text-sm [&>select]:focus:outline-none
+                        [&>select]:focus:ring-2 [&>select]:focus:ring-black/10">
+                {{ field }}
+            </div>
+            {% if field.errors %}
+            <p class="text-xs text-red-500 mt-1">{{ field.errors|join:", " }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="pt-2">
+            <button type="submit"
+                    class="w-full bg-black text-white py-3 rounded-xl text-sm font-bold hover:bg-gray-800 transition">
+                Save Changes
+            </button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

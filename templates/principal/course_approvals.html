@@ -1,0 +1,90 @@
+{% extends "principal/base.html" %}
+{% block title %}Course Approvals{% endblock %}
+
+{% block content %}
+<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white h-full flex flex-col">
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl font-extrabold text-black">Pending Requests</h2>
+            <p class="text-sm text-gray-400 font-medium mt-1">Review and manage student course enrollments.</p>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto border border-gray-100 rounded-2xl flex-1">
+        <table class="w-full text-left whitespace-nowrap">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Student</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Course</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Dept</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Price</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for request in approval_requests %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="p-5">
+                        <p class="font-extrabold text-gray-900">{{ request.student.user.first_name }}</p>
+                        <p class="text-xs text-gray-400 font-medium mt-0.5">{{ request.student.user.email }}</p>
+                    </td>
+                    <td class="p-5 text-sm font-bold text-gray-800">{{ request.course.name }}</td>
+                    <td class="p-5">
+                        <span class="bg-[#FFD384]/30 text-orange-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            {{ request.course.department }}
+                        </span>
+                    </td>
+                    <td class="p-5 text-sm font-extrabold text-gray-900">₹{{ request.course.price }}</td>
+                    <td class="p-5 text-sm text-gray-500 font-medium">{{ request.created_at|date:"d M Y" }}</td>
+                    
+                    <td class="p-5 text-center">
+                        {% if request.status == "Pending" %}
+                            <span class="bg-[#FFD384] text-orange-900 px-3 py-1.5 rounded-full text-xs font-bold">Pending</span>
+                        {% elif request.status == "Approved" %}
+                            <span class="bg-[#B5FF9D] text-green-900 px-3 py-1.5 rounded-full text-xs font-bold">Approved</span>
+                        {% else %}
+                            <span class="bg-[#FF9D9D] text-red-900 px-3 py-1.5 rounded-full text-xs font-bold">Rejected</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="p-5 text-center">
+                        {% if request.status == "Pending" %}
+                        <div class="flex justify-center space-x-2">
+                            <form method="POST" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="request_id" value="{{ request.id }}">
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:shadow-lg transition">
+                                    Approve
+                                </button>
+                            </form>
+                            <form method="POST" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="request_id" value="{{ request.id }}">
+                                <input type="hidden" name="action" value="reject">
+                                <button type="submit" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                            <span class="text-gray-400 text-xs font-bold uppercase tracking-widest">Completed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center p-10 text-gray-400 font-medium">
+                        No course approval requests found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

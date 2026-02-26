@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm
 from student.models import Student
 
+
 def home(request):
     return render(request, 'home.html')
 

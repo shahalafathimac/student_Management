@@ -9,9 +9,11 @@ class RegisterForm(UserCreationForm):
     first_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+
     last_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={'class': 'form-control'})
     )
@@ -35,8 +37,10 @@ class RegisterForm(UserCreationForm):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
-    department = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+    department = forms.ChoiceField(
+        choices=Student.DEPARTMENT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True
     )
 
     year_of_admission = forms.IntegerField(
@@ -76,6 +80,8 @@ class RegisterForm(UserCreationForm):
             'password1',
             'password2'
         ]
+
+    # ✅ Email Validation
     def clean_email(self):
         email = self.cleaned_data.get('email')
 
@@ -83,7 +89,8 @@ class RegisterForm(UserCreationForm):
             raise forms.ValidationError("This email is already registered.")
 
         return email
-    
+
+    # ✅ Save Method
     def save(self, commit=True):
         user = super().save(commit=False)
 
@@ -92,8 +99,6 @@ class RegisterForm(UserCreationForm):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.profile_picture = self.cleaned_data.get('profile_picture')
-
-        # ✅ Save gender in CustomUser
         user.gender = self.cleaned_data['gender']
 
         if commit:

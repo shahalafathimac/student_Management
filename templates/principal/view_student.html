@@ -1,0 +1,48 @@
+{% extends "principal/base.html" %}
+{% block title %}Student Details{% endblock %}
+
+{% block content %}
+<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white max-w-2xl mx-auto">
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-2xl font-extrabold text-black">Student Details</h2>
+            <p class="text-sm text-gray-400 font-medium mt-1">Read-only profile view.</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'edit_student' student.pk %}"
+               class="bg-black text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-gray-800 transition">
+                Edit
+            </a>
+            <a href="{% url 'manage_students' %}"
+               class="border border-gray-200 text-gray-500 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+                Back
+            </a>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        {% with u=student.user %}
+        <div class="flex justify-between py-3 border-b border-gray-100">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">First Name</span>
+            <span class="text-sm font-semibold text-gray-900">{{ u.first_name }}</span>
+        </div>
+        <div class="flex justify-between py-3 border-b border-gray-100">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Last Name</span>
+            <span class="text-sm font-semibold text-gray-900">{{ u.last_name }}</span>
+        </div>
+        <div class="flex justify-between py-3 border-b border-gray-100">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Email</span>
+            <span class="text-sm font-semibold text-gray-900">{{ u.email }}</span>
+        </div>
+        {% endwith %}
+        <div class="flex justify-between py-3 border-b border-gray-100">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Department</span>
+            <span class="bg-[#B5FF9D]/30 text-green-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                {{ student.department }}
+            </span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

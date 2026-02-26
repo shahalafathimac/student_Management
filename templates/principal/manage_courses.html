@@ -1,0 +1,182 @@
+{% extends "principal/base.html" %}
+{% block title %}Manage Courses{% endblock %}
+
+{% block content %}
+<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white h-full flex flex-col gap-6">
+
+    <!-- ── Header ── -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-2xl font-extrabold text-black">Course Directory</h2>
+            <p class="text-sm text-gray-400 font-medium mt-1">Add, edit, or remove academic courses.</p>
+        </div>
+        <button onclick="document.getElementById('addModal').classList.remove('hidden')"
+                class="bg-black text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add New Course
+        </button>
+    </div>
+
+    <!-- ── Django messages ── -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2
+            {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
+            {% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+            {% if message.tags == 'success' %}
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            {% else %}
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            {% endif %}
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ── Table ── -->
+    <div class="overflow-x-auto border border-gray-100 rounded-2xl flex-1">
+        <table class="w-full text-left whitespace-nowrap">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Course Title</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Department</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Price</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for course in courses %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="p-5">
+                        <p class="font-extrabold text-gray-900">{{ course.title }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5 max-w-xs truncate">{{ course.description }}</p>
+                    </td>
+                    <td class="p-5">
+                        <span class="bg-[#FFD384]/30 text-orange-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            {{ course.department }}
+                        </span>
+                    </td>
+                    <td class="p-5 font-extrabold text-gray-900 text-lg">₹{{ course.price }}</td>
+                    <td class="p-5 text-right space-x-3">
+                        <a href="{% url 'edit_course' course.pk %}"
+                           class="text-gray-500 hover:text-black font-bold text-sm transition">Edit</a>
+                        <!-- Trigger delete modal -->
+                        <button type="button"
+                                onclick="confirmDelete('{% url 'delete_course' course.pk %}', '{{ course.title|escapejs }}')"
+                                class="text-red-400 hover:text-red-600 font-bold text-sm transition">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center p-10 text-gray-400 font-medium">
+                        No courses available. Start by adding one.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: Add New Course
+════════════════════════════════════════════ -->
+<div id="addModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 animate-fade-in">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-extrabold text-gray-900">Add New Course</h3>
+            <button onclick="document.getElementById('addModal').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-700 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{% url 'manage_courses' %}" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                    {{ field.label }}{% if field.field.required %} <span class="text-red-400">*</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button"
+                        onclick="document.getElementById('addModal').classList.add('hidden')"
+                        class="px-5 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:bg-gray-100 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="bg-black text-white px-6 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-transform">
+                    Save Course
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: Confirm Delete
+════════════════════════════════════════════ -->
+<div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
+        <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+        </div>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-1">Delete Course?</h3>
+        <p class="text-sm text-gray-400 mb-6">
+            You are about to delete <span id="deleteCourseName" class="font-bold text-gray-700"></span>.
+            This action cannot be undone.
+        </p>
+        <form id="deleteForm" method="POST" class="flex justify-center gap-3">
+            {% csrf_token %}
+            <button type="button"
+                    onclick="document.getElementById('deleteModal').classList.add('hidden')"
+                    class="px-5 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:bg-gray-100 transition">
+                Cancel
+            </button>
+            <button type="submit"
+                    class="bg-red-500 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-red-600 transition">
+                Yes, Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+  // Re-open Add modal if form had errors (Django re-renders page with form errors)
+  {% if form.errors %}
+    document.getElementById('addModal').classList.remove('hidden');
+  {% endif %}
+
+  // Delete modal handler
+  function confirmDelete(url, courseName) {
+    document.getElementById('deleteForm').action = url;
+    document.getElementById('deleteCourseName').textContent = '"' + courseName + '"';
+    document.getElementById('deleteModal').classList.remove('hidden');
+  }
+</script>
+
+{% endblock %}

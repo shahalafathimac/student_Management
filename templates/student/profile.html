@@ -1,0 +1,99 @@
+{% extends "student/base.html" %}
+{% block title %}My Profile | Student MS{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+
+    <!-- LEFT PROFILE CARD -->
+    <div class="lg:col-span-1 bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col items-center text-center">
+        
+        <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-[#70C3FF] to-[#A3FF90] p-1.5 mb-6 shadow-lg">
+            <div class="w-full h-full bg-white rounded-full flex items-center justify-center text-4xl font-extrabold text-black overflow-hidden border border-white">
+                {% if request.user.student.profile_picture %}
+                    <img src="{{ request.user.student.profile_picture.url }}" class="w-full h-full object-cover">
+                {% else %}
+                    {{ request.user.first_name|first }}
+                {% endif %}
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-extrabold text-black">{{ request.user.first_name }} {{ request.user.last_name }}</h2>
+        <p class="text-sm font-bold text-gray-400 mt-2 tracking-wide uppercase">Student • {{ request.user.student.department }}</p>
+
+        <div class="w-full h-px bg-gray-100 my-8"></div>
+
+        <div class="w-full space-y-4">
+            <div class="flex justify-between items-center bg-gray-50 px-5 py-4 rounded-2xl">
+                <span class="text-gray-500 text-sm font-semibold">Reg No.</span>
+                <span class="text-black font-extrabold">{{ request.user.student.reg_number }}</span>
+            </div>
+            <div class="flex justify-between items-center bg-gray-50 px-5 py-4 rounded-2xl">
+                <span class="text-gray-500 text-sm font-semibold">Email</span>
+                <span class="text-black font-extrabold text-sm truncate max-w-[150px]">{{ request.user.email }}</span>
+            </div>
+        </div>
+
+        <div class="w-full mt-auto pt-8">
+            <a href="{% url 'edit_profile' %}" class="block w-full py-4 bg-black text-white font-bold rounded-2xl hover:shadow-lg transition-all shadow-md">
+                Edit Profile
+            </a>
+        </div>
+    </div>
+
+
+    <!-- RIGHT DETAILS SECTION -->
+    <div class="lg:col-span-2 space-y-6 flex flex-col">
+        
+        <!-- Personal Info -->
+        <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-xl font-bold text-black">Personal Details</h3>
+                <span class="bg-[#FFD384] text-orange-900 text-xs font-bold px-3 py-1 rounded-full">Info</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">First Name</label>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.first_name }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Last Name</label>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.last_name }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Age</label>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.student.age|default:"Not Provided" }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Phone Number</label>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.student.phone_number|default:"Not Provided" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Info -->
+        <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex-1">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-xl font-bold text-black">Academic Records</h3>
+                <span class="bg-[#B5FF9D] text-green-900 text-xs font-bold px-3 py-1 rounded-full">School</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Registration</label>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.student.reg_number }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Department</label>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.student.department }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Admission Year</label>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.student.year_of_admission }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock content %}

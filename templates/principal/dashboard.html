@@ -1,23 +1,119 @@
-{% extends 'base.html' %}
+{% extends "principal/base.html" %}
+{% block title %}Principal Dashboard{% endblock %}
+
 {% block content %}
+<!-- STATS GRID -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
-<h3>Principal Dashboard</h3>
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-6">
+            <h3 class="text-gray-800 font-bold text-lg">Total<br>Students</h3>
+        </div>
+        <div class="flex items-end justify-between">
+            <span class="text-5xl font-extrabold text-black">{{ total_students }}</span>
+            <span class="bg-[#70C3FF] text-blue-900 text-xs font-bold px-3 py-1 rounded-full">Users</span>
+        </div>
+    </div>
 
-<table class="table table-bordered">
-    <tr>
-        <th>Username</th>
-        <th>Age</th>
-        <th>Course</th>
-    </tr>
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-6">
+            <h3 class="text-gray-800 font-bold text-lg">Total<br>Departments</h3>
+        </div>
+        <div class="flex items-end justify-between">
+            <span class="text-5xl font-extrabold text-black">{{ total_departments }}</span>
+            <span class="bg-[#B5FF9D] text-green-900 text-xs font-bold px-3 py-1 rounded-full">Active</span>
+        </div>
+    </div>
 
-    {% for student in students %}
-    <tr>
-        <td>{{ student.user.username }}</td>
-        <td>{{ student.age }}</td>
-        <td>{{ student.course }}</td>
-    </tr>
-    {% endfor %}
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-6">
+            <h3 class="text-gray-800 font-bold text-lg">Pending<br>Requests</h3>
+        </div>
+        <div class="flex items-end justify-between">
+            <span class="text-5xl font-extrabold text-black">{{ pending_requests }}</span>
+            <span class="bg-[#FFD384] text-orange-900 text-xs font-bold px-3 py-1 rounded-full">Wait</span>
+        </div>
+    </div>
 
-</table>
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-6">
+            <h3 class="text-gray-800 font-bold text-lg">Total<br>Courses</h3>
+        </div>
+        <div class="flex items-end justify-between">
+            <span class="text-5xl font-extrabold text-black">{{ total_courses }}</span>
+            <span class="bg-[#CDC1FF] text-purple-900 text-xs font-bold px-3 py-1 rounded-full">Catalog</span>
+        </div>
+    </div>
 
-{% endblock %}
+</div>
+
+<!-- LOWER SECTIONS -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <!-- QUICK APPROVALS -->
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-black">Quick Approvals</h2>
+            <a href="{% url 'course_approvals' %}" class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition">View All</a>
+        </div>
+
+        <div class="space-y-4 flex-1">
+            {% for request in quick_approvals %}
+            <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex justify-between items-center">
+                <div>
+                    <p class="font-extrabold text-gray-900">{{ request.student.user.first_name }}</p>
+                    <p class="text-xs text-gray-500 font-medium mt-1">{{ request.course.name }}</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition shadow-sm">
+                        Approve
+                    </button>
+                    <button class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">
+                        Reject
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-10 text-gray-400 font-medium">
+                No pending approvals
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- RECENT STUDENTS -->
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col">
+        <h2 class="text-xl font-bold text-black mb-6">Recently Registered Students</h2>
+
+        <div class="overflow-hidden border border-gray-100 rounded-2xl flex-1">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Name</th>
+                        <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Email</th>
+                        <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Dept</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for student in recent_students %}
+                    <tr class="hover:bg-gray-50/50 transition">
+                        <td class="p-4 font-bold text-gray-900">{{ student.user.first_name }}</td>
+                        <td class="p-4 text-sm text-gray-500 font-medium">{{ student.user.email }}</td>
+                        <td class="p-4">
+                            <span class="bg-[#FFD384]/30 text-orange-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                {{ student.department }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="p-4 text-center text-gray-400">No recent students found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

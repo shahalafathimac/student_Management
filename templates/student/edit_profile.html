@@ -1,0 +1,106 @@
+{% extends 'student/base.html' %}
+{% block title %}Edit Profile | Student MS{% endblock %}
+
+{% block content %}
+<style>
+    /* Styling Django forms to match the light glassmorphism theme */
+    .django-form p { margin-bottom: 1.5rem; }
+    .django-form label {
+        display: block; font-size: 0.7rem; color: #9CA3AF;
+        text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; margin-bottom: 0.5rem;
+    }
+    .django-form input:not([type="file"]):not([type="checkbox"]), 
+    .django-form select, 
+    .django-form textarea {
+        width: 100%; background-color: #F9FAFB; border: 1px solid #F3F4F6;
+        border-radius: 1rem; padding: 0.875rem 1.25rem; color: #111827;
+        font-size: 1rem; font-weight: 600; outline: none; transition: all 0.2s ease-in-out;
+    }
+    .django-form input:focus, .django-form select:focus, .django-form textarea:focus {
+        border-color: #000; box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+    }
+    
+    .django-form input[type="file"] {
+        width: 100%; background-color: #F9FAFB; border: 1px dashed #D1D5DB;
+        border-radius: 1rem; padding: 0.75rem; color: #6B7280; font-size: 0.875rem;
+        font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+    }
+    .django-form input[type="file"]:hover { border-color: #000; }
+    .django-form input[type="file"]::file-selector-button {
+        background-color: #000; color: white; border: none; padding: 0.5rem 1rem;
+        border-radius: 0.75rem; margin-right: 1rem; cursor: pointer; font-weight: 700; transition: background-color 0.2s;
+    }
+    .django-form input[type="file"]::file-selector-button:hover { background-color: #374151; }
+
+    .django-form .helptext { display: block; font-size: 0.75rem; color: #9CA3AF; margin-top: 0.5rem; font-weight: 500;}
+    .django-form ul.errorlist {
+        color: #991B1B; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem;
+        background-color: #FEE2E2; padding: 0.75rem 1rem; border-radius: 0.75rem; list-style: none;
+    }
+</style>
+
+<div class="max-w-4xl mx-auto pb-8">
+    
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 lg:p-12 shadow-sm border border-white">
+        
+        <div class="mb-10 text-center">
+            <h2 class="text-3xl font-extrabold text-black">Update Profile</h2>
+            <p class="text-gray-400 mt-2 font-medium">Keep your academic and personal details up to date.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="django-form">
+            {% csrf_token %}
+
+            <!-- Avatar Visual -->
+            <div class="flex flex-col items-center mb-10 pb-10 border-b border-gray-100">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-[#FFB088] to-[#FF9D9D] p-1 shadow-md mb-3">
+                    <div class="w-full h-full bg-white rounded-full flex items-center justify-center text-3xl font-extrabold text-black overflow-hidden border border-white">
+                        {% if request.user.student.profile_picture %}
+                            <img src="{{ request.user.student.profile_picture.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                            {{ request.user.first_name|first|default:"U" }}
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="bg-black text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm">Current Avatar</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Account Form -->
+                <div>
+                    <div class="flex items-center mb-6">
+                        <span class="w-8 h-8 rounded-full bg-[#70C3FF] text-blue-900 flex items-center justify-center font-bold mr-3 shadow-sm">1</span>
+                        <h3 class="text-xl font-bold text-black">Account Info</h3>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                        {{ user_form.as_p }}
+                    </div>
+                </div>
+
+                <!-- Student Form -->
+                <div>
+                    <div class="flex items-center mb-6">
+                        <span class="w-8 h-8 rounded-full bg-[#A3FF90] text-green-900 flex items-center justify-center font-bold mr-3 shadow-sm">2</span>
+                        <h3 class="text-xl font-bold text-black">Student Details</h3>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                        {{ student_form.as_p }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-10 flex flex-col sm:flex-row gap-4">
+                <button type="submit" class="flex-1 py-4 bg-black text-white font-bold text-lg rounded-[1.5rem] hover:shadow-xl transition-all shadow-md">
+                    Save Changes
+                </button>
+                <a href="{% url 'student_profile' %}" class="flex-1 py-4 bg-white border-2 border-gray-100 text-black font-bold text-lg rounded-[1.5rem] hover:bg-gray-50 transition-all text-center">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}

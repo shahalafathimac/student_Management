@@ -63,17 +63,25 @@
                     <!-- PROFILE SECTION -->
                     <div class="border rounded-4 p-4 mb-5 bg-light">
                         <div class="d-flex align-items-center">
+
+                            <!-- IMAGE PREVIEW -->
                             <div class="me-4">
-                                <div class="rounded-circle bg-secondary"
-                                     style="width:80px;height:80px;"></div>
+                                <img id="previewImage"
+                                    src="https://via.placeholder.com/80"
+                                    class="rounded-circle"
+                                    style="width:80px;height:80px;object-fit:cover;">
                             </div>
+
                             <div>
                                 <h6 class="fw-bold">Profile Picture</h6>
                                 <p class="text-muted small mb-2">
                                     Upload a clear passport-size photo (JPG/PNG, Max 2MB)
                                 </p>
+
                                 {{ form.profile_picture }}
+
                             </div>
+
                         </div>
                     </div>
 
@@ -216,7 +224,31 @@
 <!-- SCRIPT -->
 <script>
 let currentStep = 0;
-showStep(currentStep);
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    showStep(currentStep);
+
+    // ✅ PROFILE IMAGE PREVIEW
+    const fileInput = document.querySelector('input[type="file"]');
+    const previewImage = document.getElementById("previewImage");
+
+    if (fileInput && previewImage) {
+        fileInput.addEventListener("change", function (e) {
+            const file = e.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    previewImage.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+});
+
 
 function showStep(n) {
     let steps = document.getElementsByClassName("step");
@@ -241,10 +273,48 @@ function showStep(n) {
     updateIndicator(n);
 }
 
+
 function nextPrev(n) {
+
+    // ✅ If moving forward, validate first
+    if (n === 1 && !validateStep()) {
+        return false;
+    }
+
     currentStep = currentStep + n;
     showStep(currentStep);
 }
+
+
+function validateStep() {
+    let steps = document.getElementsByClassName("step");
+    let inputs = steps[currentStep].querySelectorAll("input, select, textarea");
+    let valid = true;
+
+    inputs.forEach(function (input) {
+
+        input.classList.remove("is-invalid");
+
+        // Required field check
+        if (input.hasAttribute("required")) {
+            if (!input.value.trim()) {
+                input.classList.add("is-invalid");
+                valid = false;
+            }
+        }
+
+        // Checkbox validation
+        if (input.type === "checkbox" && input.required) {
+            if (!input.checked) {
+                input.classList.add("is-invalid");
+                valid = false;
+            }
+        }
+    });
+
+    return valid;
+}
+
 
 function updateIndicator(n) {
     let indicators = [
