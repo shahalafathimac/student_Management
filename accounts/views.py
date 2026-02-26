@@ -1,71 +1,49 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from .models import Profile
+from .forms import RegisterForm
+from student.models import Student
 
-
-# HOME PAGE
 def home(request):
-    return render(request, 'accounts/home.html')
+    return render(request, 'home.html')
 
-
-# REGISTER
 def register(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        role = request.POST.get("role")
+        form = RegisterForm(request.POST, request.FILES)
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists")
-            return redirect("home")
+        if form.is_valid():
+            user = form.save()   
+            user.role = 'student'
+            user.save(update_fields=['role'])
 
-        user = User.objects.create_user(
-            username=username,
-            password=password
-        )
+            return redirect('login')
 
-        Profile.objects.create(
-            user=user,
-            role=role
-        )
+        else:
+            print("ERRORS:", form.errors)
 
-        login(request, user)
+    else:
+        form = RegisterForm()
 
-        if role == "student":
-            return redirect("student_dashboard")
-        elif role == "principal":
-            return redirect("principal_dashboard")
-
-    return redirect("home")
+    return render(request, 'accounts/register.html', {'form': form})
 
 
-# LOGIN
 def user_login(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
         user = authenticate(request, username=username, password=password)
 
-        if user is not None:
+        if user:
             login(request, user)
 
-            role = user.profile.role
+            if user.role == 'principal':
+                return redirect('principal_dashboard')
+            else:
+                return redirect('student_dashboard')
 
-            if role == "student":
-                return redirect("student_dashboard")
-            elif role == "principal":
-                return redirect("principal_dashboard")
-
-        else:
-            messages.error(request, "Invalid credentials")
-
-    return redirect("home")
+    return render(request, 'accounts/login.html')
 
 
-# LOGOUT
 def user_logout(request):
     logout(request)
-    return redirect("home")
+    return redirect('login')

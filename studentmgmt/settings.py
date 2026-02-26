@@ -54,6 +54,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'studentmgmt.urls'
 
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -77,10 +79,10 @@ WSGI_APPLICATION = 'studentmgmt.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'project',
-        'user':'postgres',
-        'password':'12345',
+        'USER':'postgres',
+        'PASSWORD':'12345',
         'HOST':'localhost',
         'PORT':'5432',
 
@@ -127,8 +129,5 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-LOGIN_URL = '/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

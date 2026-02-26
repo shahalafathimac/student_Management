@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- TITLE SECTION -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Let’s get you started</h1>
+        <p class="text-muted">
+            Enter your details to register for the new academic year
+        </p>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <div class="d-flex justify-content-center align-items-center mb-5">
+
+        <div class="d-flex align-items-center">
+
+            <div id="step1Indicator"
+                 class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                 style="width:40px;height:40px;">
+                1
+            </div>
+            <span class="ms-2 fw-semibold text-primary">Personal Details</span>
+
+            <div class="mx-4 border-top" style="width:100px;"></div>
+
+            <div id="step2Indicator"
+                 class="rounded-circle bg-light text-dark d-flex align-items-center justify-content-center"
+                 style="width:40px;height:40px;">
+                2
+            </div>
+            <span class="ms-2 text-muted">Academic Info</span>
+
+            <div class="mx-4 border-top" style="width:100px;"></div>
+
+            <div id="step3Indicator"
+                 class="rounded-circle bg-light text-dark d-flex align-items-center justify-content-center"
+                 style="width:40px;height:40px;">
+                3
+            </div>
+            <span class="ms-2 text-muted">Security & Submit</span>
+
+        </div>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-5">
+
+            <form method="POST" enctype="multipart/form-data" id="multiStepForm">
+                {% csrf_token %}
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+
+                <!-- STEP 1 -->
+                <div class="step">
+
+                    <!-- PROFILE SECTION -->
+                    <div class="border rounded-4 p-4 mb-5 bg-light">
+                        <div class="d-flex align-items-center">
+                            <div class="me-4">
+                                <div class="rounded-circle bg-secondary"
+                                     style="width:80px;height:80px;"></div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold">Profile Picture</h6>
+                                <p class="text-muted small mb-2">
+                                    Upload a clear passport-size photo (JPG/PNG, Max 2MB)
+                                </p>
+                                {{ form.profile_picture }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PERSONAL FIELDS -->
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                First name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.first_name }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Last name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.last_name }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Email <span class="text-danger">*</span>
+                            </label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Age
+                            </label>
+                            {{ form.age }}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Gender <span class="text-danger">*</span>
+                            </label>
+                            {{ form.gender }}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Phone
+                            </label>
+                            {{ form.phone_number }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STEP 2 -->
+                <div class="step d-none">
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Registration Number <span class="text-danger">*</span>
+                            </label>
+                            {{ form.reg_number }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Department <span class="text-danger">*</span>
+                            </label>
+                            {{ form.department }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Year of Admission <span class="text-danger">*</span>
+                            </label>
+                            {{ form.year_of_admission }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STEP 3 -->
+                <div class="step d-none">
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Password <span class="text-danger">*</span>
+                            </label>
+                            {{ form.password1 }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Confirm Password <span class="text-danger">*</span>
+                            </label>
+                            {{ form.password2 }}
+                        </div>
+
+                    </div>
+
+                    <div class="form-check mt-4">
+                        {{ form.agree }}
+                        <label class="form-check-label">
+                            I agree to the terms and conditions
+                        </label>
+                    </div>
+
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="d-flex justify-content-between mt-5">
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn"
+                            onclick="nextPrev(-1)">
+                        Back
+                    </button>
+
+                    <button type="button" class="btn btn-primary px-4" id="nextBtn"
+                            onclick="nextPrev(1)">
+                        Continue
+                    </button>
+
+                    <button type="submit" class="btn btn-success px-4 d-none" id="submitBtn">
+                        Submit Registration
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- SCRIPT -->
+<script>
+let currentStep = 0;
+showStep(currentStep);
+
+function showStep(n) {
+    let steps = document.getElementsByClassName("step");
+
+    for (let i = 0; i < steps.length; i++) {
+        steps[i].classList.add("d-none");
+    }
+
+    steps[n].classList.remove("d-none");
+
+    document.getElementById("prevBtn").style.display =
+        n === 0 ? "none" : "inline-block";
+
+    if (n === (steps.length - 1)) {
+        document.getElementById("nextBtn").classList.add("d-none");
+        document.getElementById("submitBtn").classList.remove("d-none");
+    } else {
+        document.getElementById("nextBtn").classList.remove("d-none");
+        document.getElementById("submitBtn").classList.add("d-none");
+    }
+
+    updateIndicator(n);
+}
+
+function nextPrev(n) {
+    currentStep = currentStep + n;
+    showStep(currentStep);
+}
+
+function updateIndicator(n) {
+    let indicators = [
+        document.getElementById("step1Indicator"),
+        document.getElementById("step2Indicator"),
+        document.getElementById("step3Indicator")
+    ];
+
+    indicators.forEach((el, index) => {
+        if (index <= n) {
+            el.classList.remove("bg-light", "text-dark");
+            el.classList.add("bg-primary", "text-white");
+        } else {
+            el.classList.remove("bg-primary", "text-white");
+            el.classList.add("bg-light", "text-dark");
+        }
+    });
+}
+</script>
+
+{% endblock %}
