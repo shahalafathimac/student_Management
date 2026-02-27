@@ -4,7 +4,7 @@
 {% block content %}
 <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white h-full flex flex-col gap-6">
 
-    <!-- ── Header ── -->
+    <!-- Header -->
     <div class="flex justify-between items-center">
         <div>
             <h2 class="text-2xl font-extrabold text-black">Course Directory</h2>
@@ -19,28 +19,42 @@
         </button>
     </div>
 
-    <!-- ── Django messages ── -->
+    <!-- Messages -->
     {% if messages %}
-        {% for message in messages %}
-        <div class="rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2
-            {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
-            {% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
-            {% if message.tags == 'success' %}
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-            {% else %}
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-            {% endif %}
-            {{ message }}
-        </div>
-        {% endfor %}
+    {% for message in messages %}
+    <div class="rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2
+        {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
+        {% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
     {% endif %}
 
-    <!-- ── Table ── -->
+    <!-- Search + Filter Bar -->
+    <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input id="courseSearch"
+                   type="text"
+                   placeholder="Search by title or description..."
+                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3 text-sm font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+        </div>
+
+        <!-- Departments from DB -->
+        <select id="deptFilter"
+                class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+            <option value="">All Departments</option>
+            {% for dept in departments %}
+            <option value="{{ dept|lower }}">{{ dept }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Table -->
     <div class="overflow-x-auto border border-gray-100 rounded-2xl flex-1">
         <table class="w-full text-left whitespace-nowrap">
             <thead class="bg-gray-50 border-b border-gray-100">
@@ -51,9 +65,11 @@
                     <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
+            <tbody id="courseTableBody" class="divide-y divide-gray-50">
                 {% for course in courses %}
-                <tr class="hover:bg-gray-50 transition">
+                <tr class="course-row hover:bg-gray-50 transition"
+                    data-search="{{ course.title|lower }} {{ course.description|lower }}"
+                    data-dept="{{ course.department|lower }}">
                     <td class="p-5">
                         <p class="font-extrabold text-gray-900">{{ course.title }}</p>
                         <p class="text-xs text-gray-400 mt-0.5 max-w-xs truncate">{{ course.description }}</p>
@@ -67,7 +83,6 @@
                     <td class="p-5 text-right space-x-3">
                         <a href="{% url 'edit_course' course.pk %}"
                            class="text-gray-500 hover:text-black font-bold text-sm transition">Edit</a>
-                        <!-- Trigger delete modal -->
                         <button type="button"
                                 onclick="confirmDelete('{% url 'delete_course' course.pk %}', '{{ course.title|escapejs }}')"
                                 class="text-red-400 hover:text-red-600 font-bold text-sm transition">Delete</button>
@@ -82,16 +97,17 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div id="noResults" class="hidden text-center p-10 text-gray-400 font-medium">
+            No courses match your search.
+        </div>
     </div>
 </div>
 
 
-<!-- ═══════════════════════════════════════════
-     MODAL: Add New Course
-════════════════════════════════════════════ -->
+<!-- ═══ ADD MODAL ═══ -->
 <div id="addModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
      style="background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 animate-fade-in">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-extrabold text-gray-900">Add New Course</h3>
             <button onclick="document.getElementById('addModal').classList.add('hidden')"
@@ -101,7 +117,6 @@
                 </svg>
             </button>
         </div>
-
         <form method="POST" action="{% url 'manage_courses' %}" class="space-y-4">
             {% csrf_token %}
             {% for field in form %}
@@ -110,15 +125,11 @@
                     {{ field.label }}{% if field.field.required %} <span class="text-red-400">*</span>{% endif %}
                 </label>
                 {{ field }}
-                {% if field.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
-                {% endif %}
+                {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
             </div>
             {% endfor %}
-
             <div class="flex justify-end gap-3 pt-2">
-                <button type="button"
-                        onclick="document.getElementById('addModal').classList.add('hidden')"
+                <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')"
                         class="px-5 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:bg-gray-100 transition">
                     Cancel
                 </button>
@@ -132,9 +143,7 @@
 </div>
 
 
-<!-- ═══════════════════════════════════════════
-     MODAL: Confirm Delete
-════════════════════════════════════════════ -->
+<!-- ═══ DELETE MODAL ═══ -->
 <div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
      style="background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
@@ -147,12 +156,11 @@
         <h3 class="text-lg font-extrabold text-gray-900 mb-1">Delete Course?</h3>
         <p class="text-sm text-gray-400 mb-6">
             You are about to delete <span id="deleteCourseName" class="font-bold text-gray-700"></span>.
-            This action cannot be undone.
+            This cannot be undone.
         </p>
         <form id="deleteForm" method="POST" class="flex justify-center gap-3">
             {% csrf_token %}
-            <button type="button"
-                    onclick="document.getElementById('deleteModal').classList.add('hidden')"
+            <button type="button" onclick="document.getElementById('deleteModal').classList.add('hidden')"
                     class="px-5 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:bg-gray-100 transition">
                 Cancel
             </button>
@@ -166,17 +174,39 @@
 
 
 <script>
-  // Re-open Add modal if form had errors (Django re-renders page with form errors)
-  {% if form.errors %}
-    document.getElementById('addModal').classList.remove('hidden');
-  {% endif %}
+    {% if form.errors %}
+        document.getElementById('addModal').classList.remove('hidden');
+    {% endif %}
 
-  // Delete modal handler
-  function confirmDelete(url, courseName) {
-    document.getElementById('deleteForm').action = url;
-    document.getElementById('deleteCourseName').textContent = '"' + courseName + '"';
-    document.getElementById('deleteModal').classList.remove('hidden');
-  }
+    function confirmDelete(url, courseName) {
+        document.getElementById('deleteForm').action = url;
+        document.getElementById('deleteCourseName').textContent = '"' + courseName + '"';
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    const courseSearch = document.getElementById('courseSearch');
+    const deptFilter   = document.getElementById('deptFilter');
+    const noResults    = document.getElementById('noResults');
+
+    function filterCourses() {
+        const term = courseSearch.value.toLowerCase().trim();
+        const dept = deptFilter.value.toLowerCase();
+        const rows = document.querySelectorAll('.course-row');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const matchSearch = !term || row.dataset.search.includes(term);
+            const matchDept   = !dept || row.dataset.dept === dept;
+            const show = matchSearch && matchDept;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        noResults.classList.toggle('hidden', visible > 0);
+    }
+
+    courseSearch.addEventListener('input',  filterCourses);
+    deptFilter.addEventListener('change',   filterCourses);
 </script>
 
 {% endblock %}

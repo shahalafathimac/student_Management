@@ -54,7 +54,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">First Name</label>
-                    <p class="text-black font-extrabold text-lg">{{ request.user.first_name }}</p>
+                    <p class="text-black font-extrabold text-lg">{{ student.user.first_name }}</p>
                 </div>
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Last Name</label>
@@ -85,7 +85,7 @@
                 </div>
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Department</label>
-                    <p class="text-black font-extrabold text-lg">{{ request.user.student.department }}</p>
+                    <p class="text-black font-extrabold text-lg">{{ student.department }}</p>
                 </div>
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Admission Year</label>

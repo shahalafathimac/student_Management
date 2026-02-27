@@ -3,14 +3,13 @@
 
 {% block content %}
 <style>
-    /* Styling Django forms to match the light glassmorphism theme */
     .django-form p { margin-bottom: 1.5rem; }
     .django-form label {
         display: block; font-size: 0.7rem; color: #9CA3AF;
         text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; margin-bottom: 0.5rem;
     }
-    .django-form input:not([type="file"]):not([type="checkbox"]), 
-    .django-form select, 
+    .django-form input:not([type="file"]):not([type="checkbox"]),
+    .django-form select,
     .django-form textarea {
         width: 100%; background-color: #F9FAFB; border: 1px solid #F3F4F6;
         border-radius: 1rem; padding: 0.875rem 1.25rem; color: #111827;
@@ -19,20 +18,7 @@
     .django-form input:focus, .django-form select:focus, .django-form textarea:focus {
         border-color: #000; box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
     }
-    
-    .django-form input[type="file"] {
-        width: 100%; background-color: #F9FAFB; border: 1px dashed #D1D5DB;
-        border-radius: 1rem; padding: 0.75rem; color: #6B7280; font-size: 0.875rem;
-        font-weight: 600; cursor: pointer; transition: border-color 0.2s;
-    }
-    .django-form input[type="file"]:hover { border-color: #000; }
-    .django-form input[type="file"]::file-selector-button {
-        background-color: #000; color: white; border: none; padding: 0.5rem 1rem;
-        border-radius: 0.75rem; margin-right: 1rem; cursor: pointer; font-weight: 700; transition: background-color 0.2s;
-    }
-    .django-form input[type="file"]::file-selector-button:hover { background-color: #374151; }
-
-    .django-form .helptext { display: block; font-size: 0.75rem; color: #9CA3AF; margin-top: 0.5rem; font-weight: 500;}
+    .django-form .helptext { display: none; }
     .django-form ul.errorlist {
         color: #991B1B; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem;
         background-color: #FEE2E2; padding: 0.75rem 1rem; border-radius: 0.75rem; list-style: none;
@@ -40,9 +26,8 @@
 </style>
 
 <div class="max-w-4xl mx-auto pb-8">
-    
     <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 lg:p-12 shadow-sm border border-white">
-        
+
         <div class="mb-10 text-center">
             <h2 class="text-3xl font-extrabold text-black">Update Profile</h2>
             <p class="text-gray-400 mt-2 font-medium">Keep your academic and personal details up to date.</p>
@@ -51,56 +36,147 @@
         <form method="POST" enctype="multipart/form-data" class="django-form">
             {% csrf_token %}
 
-            <!-- Avatar Visual -->
+            <!-- ===== AVATAR UPLOAD — photo field lives HERE ===== -->
             <div class="flex flex-col items-center mb-10 pb-10 border-b border-gray-100">
-                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-[#FFB088] to-[#FF9D9D] p-1 shadow-md mb-3">
-                    <div class="w-full h-full bg-white rounded-full flex items-center justify-center text-3xl font-extrabold text-black overflow-hidden border border-white">
+
+                <!-- Circle preview -->
+                <div id="avatarRing"
+                     class="w-28 h-28 rounded-full bg-gradient-to-tr from-[#FFB088] to-[#FF9D9D] p-1 shadow-md mb-4 cursor-pointer"
+                     onclick="document.getElementById('id_profile_picture').click()"
+                     title="Click to change photo">
+                    <div class="w-full h-full bg-white rounded-full flex items-center justify-center text-3xl font-extrabold text-black overflow-hidden border border-white relative group">
                         {% if request.user.student.profile_picture %}
-                            <img src="{{ request.user.student.profile_picture.url }}" class="w-full h-full object-cover">
+                            <img id="avatarPreview"
+                                 src="{{ request.user.student.profile_picture.url }}"
+                                 class="w-full h-full object-cover">
                         {% else %}
-                            {{ request.user.first_name|first|default:"U" }}
+                            <span id="avatarInitial">{{ request.user.first_name|first|default:"U" }}</span>
+                            <img id="avatarPreview" src="" class="w-full h-full object-cover hidden">
                         {% endif %}
+                        <!-- Hover overlay -->
+                        <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-                <span class="bg-black text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm">Current Avatar</span>
+
+                <!-- Hidden file input — rendered from the form field -->
+                <div class="hidden">
+                    {{ student_form.profile_picture }}
+                </div>
+
+                <span class="bg-black text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-sm mb-2">
+                    Profile Photo
+                </span>
+                <p id="fileNameLabel" class="text-xs text-gray-400 font-medium">Click the circle to upload a new photo</p>
+
+                {% if student_form.profile_picture.errors %}
+                <ul class="errorlist mt-2">
+                    {% for error in student_form.profile_picture.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </div>
+            <!-- ===================================================== -->
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- Account Form -->
+
+                <!-- Account Info -->
                 <div>
                     <div class="flex items-center mb-6">
                         <span class="w-8 h-8 rounded-full bg-[#70C3FF] text-blue-900 flex items-center justify-center font-bold mr-3 shadow-sm">1</span>
                         <h3 class="text-xl font-bold text-black">Account Info</h3>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                        {{ user_form.as_p }}
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+                        {% for field in user_form %}
+                        <div>
+                            <label for="{{ field.id_for_label }}"
+                                   class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <ul class="errorlist mt-1">
+                                {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
 
-                <!-- Student Form -->
+                <!-- Student Details — skip profile_picture, it's already above -->
                 <div>
                     <div class="flex items-center mb-6">
                         <span class="w-8 h-8 rounded-full bg-[#A3FF90] text-green-900 flex items-center justify-center font-bold mr-3 shadow-sm">2</span>
                         <h3 class="text-xl font-bold text-black">Student Details</h3>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                        {{ student_form.as_p }}
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+                        {% for field in student_form %}
+                            {% if field.name != 'profile_picture' %}  {# already rendered above #}
+                            <div>
+                                <label for="{{ field.id_for_label }}"
+                                       class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <ul class="errorlist mt-1">
+                                    {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
+
             </div>
 
             <!-- Actions -->
             <div class="mt-10 flex flex-col sm:flex-row gap-4">
-                <button type="submit" class="flex-1 py-4 bg-black text-white font-bold text-lg rounded-[1.5rem] hover:shadow-xl transition-all shadow-md">
+                <button type="submit"
+                        class="flex-1 py-4 bg-black text-white font-bold text-lg rounded-[1.5rem] hover:shadow-xl transition-all shadow-md">
                     Save Changes
                 </button>
-                <a href="{% url 'student_profile' %}" class="flex-1 py-4 bg-white border-2 border-gray-100 text-black font-bold text-lg rounded-[1.5rem] hover:bg-gray-50 transition-all text-center">
+                <a href="{% url 'student_profile' %}"
+                   class="flex-1 py-4 bg-white border-2 border-gray-100 text-black font-bold text-lg rounded-[1.5rem] hover:bg-gray-50 transition-all text-center">
                     Cancel
                 </a>
             </div>
 
         </form>
-
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const fileInput    = document.getElementById('id_profile_picture');
+    const preview      = document.getElementById('avatarPreview');
+    const initial      = document.getElementById('avatarInitial');
+    const fileLabel    = document.getElementById('fileNameLabel');
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        // Show filename below circle
+        
+
+        // Live preview inside the circle
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            if (initial) initial.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
 {% endblock %}

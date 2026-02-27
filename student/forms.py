@@ -13,7 +13,8 @@ class StudentProfileForm(forms.ModelForm):
             'department',
             'year_of_admission',
             'age',
-            'phone_number'
+            'phone_number',
+            'profile_picture', 
         ]
 
 

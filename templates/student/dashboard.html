@@ -54,50 +54,96 @@
         </div>
     </div>
 
-    <!-- BOTTOM LEFT: Tasks/Approved List -->
+   <!-- BOTTOM LEFT: Tasks/Approved List -->
     <div class="lg:col-span-2 bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col">
+        
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-black">My Courses</h2>
-            <button class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            </button>
         </div>
 
         <!-- Filter Pills -->
         <div class="flex space-x-3 mb-8">
-            <span class="bg-black text-white px-5 py-2 rounded-full text-sm font-bold cursor-pointer shadow-md">Approved</span>
-            <span class="bg-white border border-gray-200 text-gray-600 px-5 py-2 rounded-full text-sm font-bold cursor-pointer hover:bg-gray-50">All Courses</span>
+
+            <a href="?status=approved"
+            class="px-5 py-2 rounded-full text-sm font-bold shadow-md
+            {% if request.GET.status == 'approved' or not request.GET.status %}
+                bg-black text-white
+            {% else %}
+                bg-white border border-gray-200 text-gray-600 hover:bg-gray-50
+            {% endif %}">
+                Approved
+            </a>
+
+            <a href="?status=all"
+            class="px-5 py-2 rounded-full text-sm font-bold shadow-md
+            {% if request.GET.status == 'all' %}
+                bg-black text-white
+            {% else %}
+                bg-white border border-gray-200 text-gray-600 hover:bg-gray-50
+            {% endif %}">
+                All Courses
+            </a>
+
         </div>
 
+        <!-- COURSE LIST -->
         <div class="flex-1 overflow-y-auto space-y-6">
+
             {% if approved_courses %}
-                {% for course in approved_courses %}
+                {% for purchase in approved_courses %}
+
                 <div class="group">
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h4 class="font-bold text-gray-900 text-base leading-tight">{{ course.name }}</h4>
-                            <p class="text-xs text-gray-400 font-medium mt-1">{{ course.department }}</p>
+                            <h4 class="font-bold text-gray-900 text-base leading-tight">
+                                {{ purchase.course.title }}
+                            </h4>
+                            <p class="text-xs text-gray-400 font-medium mt-1">
+                                {{ purchase.course.department }}
+                            </p>
                         </div>
-                        <span class="bg-[#70C3FF] text-blue-900 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide">
-                            Active
+
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+                            {% if purchase.status == 'Approved' %}
+                                bg-green-500 text-white
+                            {% elif purchase.status == 'Pending' %}
+                                bg-yellow-400 text-black
+                            {% elif purchase.status == 'Rejected' %}
+                                bg-red-500 text-white
+                            {% endif %}
+                        ">
+                            {{ purchase.status }}
                         </span>
                     </div>
-                    <!-- Colorful visual bar matching the image style -->
+
                     <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden flex">
-                        <div class="h-full bg-[#A3FF90] rounded-full" style="width: 100%;"></div>
+                    <div class="h-full rounded-full
+                        {% if purchase.status == 'Approved' %}
+                            bg-[#A3FF90]
+                        {% elif purchase.status == 'Pending' %}
+                            bg-yellow-400
+                        {% elif purchase.status == 'Rejected' %}
+                            bg-red-400
+                        {% endif %}
+                    " style="width: 100%;">
                     </div>
                 </div>
+                </div>
+
                 {% endfor %}
             {% else %}
                 <div class="text-center text-gray-400 py-10 font-medium">
-                    No approved courses available yet.
+                    No courses available yet.
                 </div>
             {% endif %}
+
         </div>
 
-        <a href="{% url 'purchase_courses' %}" class="mt-6 w-full py-4 bg-black text-white rounded-2xl font-bold text-center hover:shadow-lg transition-all shadow-md">
+        <a href="{% url 'purchase_courses' %}" 
+        class="mt-6 w-full py-4 bg-black text-white rounded-2xl font-bold text-center hover:shadow-lg transition-all shadow-md">
             Browse New Courses
         </a>
+
     </div>
 
     <!-- BOTTOM RIGHT: My Schedule / Info -->

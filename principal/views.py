@@ -1,36 +1,62 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from student.models import Student
+from . import models
 from .models import Course
+from django.db.models import Q
 from .forms import CourseForm, StudentEditForm
 from accounts.decorators import role_required
+from student.models import CoursePurchase
 
 @role_required(['principal'])
 def principal_dashboard(request):
-    students = Student.objects.all()
-    return render(request, 'principal/dashboard.html', {'students': students})
+    from student.models import CoursePurchase
+
+    total_students    = Student.objects.count()
+    total_courses     = Course.objects.count()
+    total_departments = Course.objects.values('department').distinct().count()
+    pending_requests  = CoursePurchase.objects.filter(status='Pending').count()
+
+    quick_approvals = CoursePurchase.objects.select_related(
+        'student__user', 'course'
+    ).filter(status='Pending').order_by('-created_at')[:5]
+
+    recent_students = Student.objects.select_related('user').order_by(
+        '-user__date_joined'
+    )[:5]
+
+    return render(request, 'principal/dashboard.html', {
+        'total_students':    total_students,
+        'total_courses':     total_courses,
+        'total_departments': total_departments,
+        'pending_requests':  pending_requests,
+        'quick_approvals':   quick_approvals,
+        'recent_students':   recent_students,
+    })
 
 @role_required(['principal'])
 def manage_courses(request):
-    """
-    GET  → show all courses + blank Add form
-    POST → validate & save new course, then redirect (PRG pattern)
-    """
     courses = Course.objects.all().order_by('-created_at')
     form = CourseForm()
+
+    # Departments from DB — auto-updates when new depts are added
+    departments = Course.objects.values_list(
+        'department', flat=True
+    ).distinct().order_by('department')
 
     if request.method == 'POST':
         form = CourseForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, 'Course added successfully.')
-            return redirect('manage_courses')          # PRG – avoids duplicate submit on refresh
+            return redirect('manage_courses')
         else:
             messages.error(request, 'Please fix the errors below.')
 
     return render(request, 'principal/manage_courses.html', {
-        'courses': courses,
-        'form': form,
+        'courses':     courses,
+        'form':        form,
+        'departments': departments,   # ← for the filter dropdown
     })
 
 @role_required(['principal'])
@@ -107,7 +133,30 @@ def view_student(request, pk):
 
 @role_required(['principal'])
 def course_approvals(request):
-    return render(request, 'principal/course_approvals.html')
+
+    if request.method == "POST":
+        request_id = request.POST.get("request_id")
+        action = request.POST.get("action")
+
+        purchase = get_object_or_404(CoursePurchase, id=request_id)
+
+        if action == "approve":
+            purchase.status = "Approved"
+            messages.success(request, "Course approved successfully.")
+        elif action == "reject":
+            purchase.status = "Rejected"
+            messages.success(request, "Course rejected successfully.")
+
+        purchase.save()
+        return redirect("course_approvals")
+
+    pending_requests = CoursePurchase.objects.select_related(
+        'student__user', 'course'
+    ).all().order_by('-created_at')
+
+    return render(request, 'principal/course_approvals.html', {
+        'pending_requests': pending_requests
+    })
 
 @role_required(['principal'])
 def edit_student(request, pk):

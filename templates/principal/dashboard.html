@@ -54,23 +54,45 @@
     <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-black">Quick Approvals</h2>
-            <a href="{% url 'course_approvals' %}" class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition">View All</a>
+            <a href="{% url 'course_approvals' %}"
+               class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition">
+               View All
+            </a>
         </div>
 
         <div class="space-y-4 flex-1">
-            {% for request in quick_approvals %}
-            <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex justify-between items-center">
-                <div>
-                    <p class="font-extrabold text-gray-900">{{ request.student.user.first_name }}</p>
-                    <p class="text-xs text-gray-500 font-medium mt-1">{{ request.course.name }}</p>
+            {% for req in quick_approvals %}
+            <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex justify-between items-center gap-4">
+                <div class="min-w-0">
+                    <p class="font-extrabold text-gray-900 truncate">
+                        {{ req.student.user.first_name }} {{ req.student.user.last_name }}
+                    </p>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5 truncate">{{ req.course.title }}</p>
                 </div>
-                <div class="flex space-x-2">
-                    <button class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition shadow-sm">
-                        Approve
-                    </button>
-                    <button class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">
-                        Reject
-                    </button>
+                <div class="flex space-x-2 flex-shrink-0">
+
+                    <!-- Approve -->
+                    <form method="POST" action="{% url 'course_approvals' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                        <input type="hidden" name="action"     value="approve">
+                        <button type="submit"
+                                class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition shadow-sm">
+                            Approve
+                        </button>
+                    </form>
+
+                    <!-- Reject -->
+                    <form method="POST" action="{% url 'course_approvals' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                        <input type="hidden" name="action"     value="reject">
+                        <button type="submit"
+                                class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">
+                            Reject
+                        </button>
+                    </form>
+
                 </div>
             </div>
             {% empty %}
@@ -97,7 +119,9 @@
                 <tbody class="divide-y divide-gray-50">
                     {% for student in recent_students %}
                     <tr class="hover:bg-gray-50/50 transition">
-                        <td class="p-4 font-bold text-gray-900">{{ student.user.first_name }}</td>
+                        <td class="p-4 font-bold text-gray-900">
+                            {{ student.user.first_name }} {{ student.user.last_name }}
+                        </td>
                         <td class="p-4 text-sm text-gray-500 font-medium">{{ student.user.email }}</td>
                         <td class="p-4">
                             <span class="bg-[#FFD384]/30 text-orange-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">

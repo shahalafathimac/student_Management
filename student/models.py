@@ -16,8 +16,8 @@ class Student(models.Model):
     year_of_admission = models.IntegerField()
     age              = models.IntegerField(null=True, blank=True)
     phone_number     = models.CharField(max_length=15, null=True, blank=True)
-    profile_picture  = models.ImageField(              # ← ADD THIS
-        upload_to='student_avatars/',
+    profile_picture  = models.ImageField(             
+        upload_to='profiles/',
         null=True,
         blank=True
     )

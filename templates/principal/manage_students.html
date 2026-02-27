@@ -4,13 +4,45 @@
 {% block content %}
 <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white h-full flex flex-col">
 
-    <div class="flex justify-between items-center mb-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
         <div>
             <h2 class="text-2xl font-extrabold text-black">Student Records</h2>
             <p class="text-sm text-gray-400 font-medium mt-1">View and manage enrolled students.</p>
         </div>
+        <!-- Live result count -->
+        <span id="resultCount" class="bg-gray-50 border border-gray-100 text-gray-500 text-xs font-bold px-4 py-2 rounded-full">
+            {{ students|length }} student{{ students|length|pluralize }}
+        </span>
     </div>
 
+    <!-- Search + Filter Bar -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+
+        <!-- Live text search -->
+        <div class="relative flex-1">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input id="studentSearch"
+                   type="text"
+                   placeholder="Search by name or email..."
+                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3 text-sm font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+        </div>
+
+        <!-- Department filter — from DB via context -->
+        <select id="deptFilter"
+                class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+            <option value="">All Departments</option>
+            {% for value, label in departments %}
+            <option value="{{ value|lower }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Table -->
     <div class="overflow-x-auto border border-gray-100 rounded-2xl flex-1">
         <table class="w-full text-left whitespace-nowrap">
             <thead class="bg-gray-50 border-b border-gray-100">
@@ -21,10 +53,15 @@
                     <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
+            <tbody id="studentTableBody" class="divide-y divide-gray-50">
                 {% for student in students %}
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="p-5 font-extrabold text-gray-900">{{ student.user.first_name }}</td>
+                <tr class="student-row hover:bg-gray-50 transition"
+                    data-name="{{ student.user.first_name|lower }} {{ student.user.last_name|lower }}"
+                    data-email="{{ student.user.email|lower }}"
+                    data-dept="{{ student.department|lower }}">
+                    <td class="p-5 font-extrabold text-gray-900">
+                        {{ student.user.first_name }} {{ student.user.last_name }}
+                    </td>
                     <td class="p-5 text-sm text-gray-500 font-medium">{{ student.user.email }}</td>
                     <td class="p-5">
                         <span class="bg-[#B5FF9D]/30 text-green-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
@@ -32,18 +69,18 @@
                         </span>
                     </td>
                     <td class="p-5 text-right space-x-2">
-                    <a href="{% url 'view_student' student.pk %}"
-                    class="bg-white border border-gray-200 text-black px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">
-                        View
-                    </a>
-                    <a href="{% url 'edit_student' student.pk %}"
-                    class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition shadow-sm">
-                        Edit
-                    </a>
-                </td>
+                        <a href="{% url 'view_student' student.pk %}"
+                           class="bg-white border border-gray-200 text-black px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">
+                            View
+                        </a>
+                        <a href="{% url 'edit_student' student.pk %}"
+                           class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition shadow-sm">
+                            Edit
+                        </a>
+                    </td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr id="emptyRow">
                     <td colspan="4" class="text-center p-10 text-gray-400 font-medium">
                         No students found.
                     </td>
@@ -51,7 +88,43 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- No-results row (JS-controlled) -->
+        <div id="noResults" class="hidden text-center p-10 text-gray-400 font-medium">
+            No students match your search.
+        </div>
     </div>
 
 </div>
+
+{% block scripts %}
+<script>
+    const searchInput = document.getElementById('studentSearch');
+    const deptFilter  = document.getElementById('deptFilter');
+    const noResults   = document.getElementById('noResults');
+    const countBadge  = document.getElementById('resultCount');
+
+    function filterStudents() {
+        const term = searchInput.value.toLowerCase().trim();
+        const dept = deptFilter.value.toLowerCase();
+        const rows = document.querySelectorAll('.student-row');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const matchName  = !term || row.dataset.name.includes(term) || row.dataset.email.includes(term);
+            const matchDept  = !dept || row.dataset.dept === dept;
+            const show = matchName && matchDept;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        noResults.classList.toggle('hidden', visible > 0);
+        countBadge.textContent = visible + ' student' + (visible !== 1 ? 's' : '');
+    }
+
+    searchInput.addEventListener('input',  filterStudents);
+    deptFilter.addEventListener('change',  filterStudents);
+</script>
+{% endblock %}
+
 {% endblock %}

@@ -5,13 +5,12 @@
 <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white min-h-full flex flex-col">
 
     <!-- Header & Stats -->
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6 border-b border-gray-100 pb-8">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-6 border-b border-gray-100 pb-6">
         <div>
             <h1 class="text-3xl font-extrabold text-black">Course Catalog</h1>
             <p class="text-gray-400 font-medium mt-1 text-sm">Select courses to enroll in for the new semester.</p>
         </div>
-
-        <div class="flex space-x-3">
+        <div class="flex space-x-3 flex-shrink-0">
             <div class="bg-gray-50 border border-gray-100 px-6 py-3.5 rounded-2xl flex items-center">
                 <span class="text-gray-500 text-sm font-semibold mr-2">Selected:</span>
                 <span id="selectedCount" class="text-black font-extrabold text-xl">0</span>
@@ -23,86 +22,290 @@
         </div>
     </div>
 
-    <!-- Course Form Grid -->
+    <!-- ── Search + Filter Bar ── -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+
+        <!-- Live text search -->
+        <div class="relative flex-1">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input id="liveSearch"
+                   type="text"
+                   placeholder="Search by title, department, description..."
+                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3 text-sm font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+        </div>
+
+        <!-- Department filter -->
+<select id="deptFilter"
+        class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+    <option value="">All Departments</option>
+    {% for dept in departments %}
+    <option value="{{ dept|lower }}">{{ dept }}</option>
+    {% endfor %}
+</select>
+
+        <!-- Status filter -->
+        <select id="statusFilter"
+                class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+            <option value="">All Status</option>
+            <option value="enrolled">Enrolled</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+        </select>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for msg in messages %}
+        <div class="px-5 py-3 rounded-2xl text-sm font-semibold
+            {% if msg.tags == 'success' %}bg-[#B5FF9D]/40 text-green-900
+            {% elif msg.tags == 'warning' %}bg-[#FFD384]/40 text-orange-900
+            {% elif msg.tags == 'error' %}bg-red-100 text-red-800
+            {% else %}bg-blue-50 text-blue-800{% endif %}">
+            {{ msg }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Course Grid -->
     <form method="POST" class="flex-1 flex flex-col">
         {% csrf_token %}
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 flex-1">
+        <!-- Zero-results message — hidden until JS triggers it -->
+        <div id="noResults" class="hidden py-16 text-center">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            <p class="text-gray-400 font-semibold text-sm">No courses match your search.</p>
+        </div>
+
+        <div id="courseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {% for course in courses %}
-            <label class="bg-white rounded-3xl p-6 border-2 border-gray-100 hover:border-black transition-all cursor-pointer shadow-sm relative flex flex-col group">
-                
-                <div class="flex justify-between items-start mb-4">
+
+            {# ========== APPROVED ========== #}
+            {% if course.purchase_status == "Approved" %}
+            <div class="course-card bg-white rounded-3xl p-6 border-2 border-green-200 shadow-sm flex flex-col h-[240px]"
+                 data-search="{{ course.title|lower }} {{ course.department|lower }} {{ course.description|lower }}"
+                 data-dept="{{ course.department|lower }}"
+                 data-status="enrolled">
+                <div class="flex justify-between items-center mb-3">
                     <span class="bg-[#FFD384] text-orange-900 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest">
                         {{ course.department }}
                     </span>
-                    <input type="checkbox" name="selected_courses" class="course-checkbox" value="{{ course.price }}">
+                    <span class="bg-[#B5FF9D] text-green-900 px-3 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wide">
+                        ✓ Enrolled
+                    </span>
                 </div>
+                <div class="h-6 mb-3"></div>
+                <h3 class="text-lg font-extrabold text-gray-900 mb-1 leading-snug">{{ course.title }}</h3>
+                <p class="text-xs text-gray-400 font-medium flex-1 line-clamp-2">{{ course.description }}</p>
+                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <span class="text-xl font-extrabold text-black">₹{{ course.price }}</span>
+                    <button type="button"
+                            onclick="openModal('{{ course.id }}')"
+                            class="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-gray-800 transition">
+                        View Details
+                    </button>
+                </div>
+            </div>
 
-                <div class="mt-2 flex-1">
-                    <h3 class="text-black font-extrabold text-xl leading-tight mb-2 group-hover:text-gray-700 transition">{{ course.name }}</h3>
-                    <p class="text-gray-400 text-sm font-medium line-clamp-3">{{ course.description }}</p>
+            {# ========== PENDING ========== #}
+            {% elif course.purchase_status == "Pending" %}
+            <div class="course-card bg-white rounded-3xl p-6 border-2 border-yellow-200 shadow-sm flex flex-col h-[240px]"
+                 data-search="{{ course.title|lower }} {{ course.department|lower }} {{ course.description|lower }}"
+                 data-dept="{{ course.department|lower }}"
+                 data-status="pending">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="bg-[#FFD384] text-orange-900 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest">
+                        {{ course.department }}
+                    </span>
+                    <span class="bg-[#FFD384] text-orange-900 px-3 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wide">
+                        ⏳ Pending
+                    </span>
                 </div>
-                
-                <div class="flex justify-between items-center border-t border-gray-50 pt-5 mt-5">
-                    <span class="text-gray-400 text-xs font-bold uppercase tracking-wider">Price</span>
-                    <span class="text-black font-extrabold text-2xl">₹{{ course.price }}</span>
+                <div class="h-6 mb-3"></div>
+                <h3 class="text-lg font-extrabold text-gray-900 mb-1 leading-snug">{{ course.title }}</h3>
+                <p class="text-xs text-gray-400 font-medium flex-1 line-clamp-2">{{ course.description }}</p>
+                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <span class="text-xl font-extrabold text-black">₹{{ course.price }}</span>
+                    <span class="text-xs text-gray-400 font-semibold">Awaiting approval</span>
+                </div>
+            </div>
+
+            {# ========== REJECTED or NEW ========== #}
+            {% else %}
+            <label class="course-card bg-white rounded-3xl p-6 border-2 border-gray-100 hover:border-black transition-all cursor-pointer shadow-sm flex flex-col h-[240px] group"
+                   data-search="{{ course.title|lower }} {{ course.department|lower }} {{ course.description|lower }}"
+                   data-dept="{{ course.department|lower }}"
+                   data-status="{% if course.purchase_status == 'Rejected' %}rejected{% else %}available{% endif %}">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="bg-[#FFD384] text-orange-900 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest">
+                        {{ course.department }}
+                    </span>
+                    <input type="checkbox"
+                           name="selected_courses"
+                           class="course-checkbox w-5 h-5 accent-black cursor-pointer flex-shrink-0"
+                           value="{{ course.id }}"
+                           data-price="{{ course.price }}">
+                </div>
+                <div class="h-6 mb-3 flex items-center">
+                    {% if course.purchase_status == "Rejected" %}
+                    <span class="inline-flex items-center bg-red-100 text-red-700 px-3 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wide">
+                        ✕ Rejected — Re-apply
+                    </span>
+                    {% endif %}
+                </div>
+                <h3 class="text-lg font-extrabold text-gray-900 mb-1 leading-snug">{{ course.title }}</h3>
+                <p class="text-xs text-gray-400 font-medium flex-1 line-clamp-2">{{ course.description }}</p>
+                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <span class="text-xl font-extrabold text-black">₹{{ course.price }}</span>
+                    <span class="text-xs text-gray-400 font-semibold group-hover:text-black transition">Select →</span>
                 </div>
             </label>
+            {% endif %}
+
             {% empty %}
             <div class="col-span-full py-16 text-center">
-                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-                </div>
                 <h3 class="text-xl font-bold text-gray-900">No courses available</h3>
                 <p class="text-gray-400 font-medium mt-1">Check back later for new additions.</p>
             </div>
             {% endfor %}
         </div>
 
-        {% if courses %}
-        <div class="mt-auto border-t border-gray-100 pt-8 flex justify-end">
-            <button type="submit" class="bg-black text-white font-extrabold text-lg py-4 px-10 rounded-2xl shadow-[0_8px_20px_rgb(0,0,0,0.15)] hover:scale-[1.02] transition-transform">
+        <div id="submitBar" class="hidden mt-auto border-t border-gray-100 pt-8 flex justify-end">
+            <button type="submit"
+                    class="bg-black text-white font-extrabold text-lg py-4 px-10 rounded-2xl shadow-[0_8px_20px_rgb(0,0,0,0.15)] hover:scale-[1.02] transition-transform">
                 Proceed to Payment
             </button>
         </div>
-        {% endif %}
-
     </form>
 </div>
+
+<!-- ===== VIEW DETAILS MODALS ===== -->
+{% for course in courses %}
+{% if course.purchase_status == "Approved" %}
+<div id="modal-{{ course.id }}"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+     onclick="closeModalOutside(event, '{{ course.id }}')">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl z-10">
+        <button onclick="closeModal('{{ course.id }}')"
+                class="absolute top-5 right-5 w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition text-gray-400 hover:text-black">
+            ✕
+        </button>
+        <span class="inline-block bg-[#B5FF9D] text-green-900 text-[10px] font-extrabold px-4 py-1.5 rounded-full uppercase tracking-widest mb-5">
+            ✓ Enrolled
+        </span>
+        <h2 class="text-2xl font-extrabold text-black mb-1">{{ course.title }}</h2>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">{{ course.department }}</p>
+        <p class="text-sm text-gray-600 font-medium leading-relaxed mb-8">{{ course.description }}</p>
+        <div class="bg-gray-50 rounded-2xl p-5 flex justify-between items-center border border-gray-100">
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Course Fee</p>
+                <p class="text-2xl font-extrabold text-black">₹{{ course.price }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
+                <span class="bg-[#B5FF9D] text-green-900 text-xs font-extrabold px-3 py-1 rounded-full">Active</span>
+            </div>
+        </div>
+        <button onclick="closeModal('{{ course.id }}')"
+                class="mt-6 w-full py-3.5 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition">
+            Close
+        </button>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
 {% endblock content %}
 
 {% block scripts %}
 <script>
+    // ── Checkbox + running total ──────────────────────────────────
     const checkboxes = document.querySelectorAll('.course-checkbox');
-    const totalAmount = document.getElementById('totalAmount');
-    const selectedCount = document.getElementById('selectedCount');
+    const totalEl    = document.getElementById('totalAmount');
+    const countEl    = document.getElementById('selectedCount');
+    const submitBar  = document.getElementById('submitBar');
 
-    // Add visual focus class to the card when checkbox is checked
-    checkboxes.forEach(box => {
-        box.addEventListener('change', function () {
-            
-            // Handle math
-            let total = 0;
-            let count = 0;
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    total += parseFloat(cb.value);
-                    count++;
-                }
-            });
-            totalAmount.innerText = total;
-            selectedCount.innerText = count;
-
-            // Handle styling the card container
-            const card = this.closest('label');
-            if (this.checked) {
-                card.classList.replace('border-gray-100', 'border-black');
-                card.classList.add('ring-4', 'ring-gray-100');
-            } else {
-                card.classList.replace('border-black', 'border-gray-100');
-                card.classList.remove('ring-4', 'ring-gray-100');
-            }
+    function updateTotal() {
+        let total = 0, count = 0;
+        checkboxes.forEach(cb => {
+            if (cb.checked) { total += parseFloat(cb.dataset.price); count++; }
         });
+        totalEl.innerText = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        countEl.innerText = count;
+        submitBar.classList.toggle('hidden', count === 0);
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function () {
+            const card = this.closest('label');
+            card.classList.toggle('border-black',    this.checked);
+            card.classList.toggle('border-gray-100', !this.checked);
+            card.classList.toggle('ring-4',          this.checked);
+            card.classList.toggle('ring-gray-100',   this.checked);
+            updateTotal();
+        });
+    });
+
+    // ── Live search + filters ─────────────────────────────────────
+    const searchInput  = document.getElementById('liveSearch');
+    const deptFilter   = document.getElementById('deptFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const noResults    = document.getElementById('noResults');
+
+    function filterCards() {
+        const term   = searchInput.value.toLowerCase().trim();
+        const dept   = deptFilter.value.toLowerCase();
+        const status = statusFilter.value.toLowerCase();
+        const cards  = document.querySelectorAll('.course-card');
+        let   visible = 0;
+
+        cards.forEach(card => {
+            const matchSearch = !term   || card.dataset.search.includes(term);
+            const matchDept   = !dept   || card.dataset.dept   === dept;
+            const matchStatus = !status || card.dataset.status === status;
+            const show = matchSearch && matchDept && matchStatus;
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        noResults.classList.toggle('hidden', visible > 0);
+    }
+
+    searchInput.addEventListener('input',   filterCards);
+    deptFilter.addEventListener('change',   filterCards);
+    statusFilter.addEventListener('change', filterCards);
+
+    // ── Modals ────────────────────────────────────────────────────
+    function openModal(id) {
+        const m = document.getElementById('modal-' + id);
+        m.classList.remove('hidden'); m.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        const m = document.getElementById('modal-' + id);
+        m.classList.add('hidden'); m.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+    function closeModalOutside(event, id) {
+        if (event.target === document.getElementById('modal-' + id)) closeModal(id);
+    }
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('[id^="modal-"]').forEach(m => {
+                if (!m.classList.contains('hidden')) closeModal(m.id.replace('modal-', ''));
+            });
+        }
     });
 </script>
 {% endblock scripts %}

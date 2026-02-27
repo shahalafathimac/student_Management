@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm
 from student.models import Student
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 def home(request):
@@ -12,9 +14,26 @@ def register(request):
         form = RegisterForm(request.POST, request.FILES)
 
         if form.is_valid():
-            user = form.save()   
+            user = form.save(commit=False)
             user.role = 'student'
-            user.save(update_fields=['role'])
+            user.save()
+
+             # Send welcome email
+            try:
+                send_mail(
+                    subject='Welcome to Student Management System',
+                    message=f"""Hello {user.first_name or user.username},
+                    Your account has been successfully created.
+                    Login here: http://127.0.0.1:8000/accounts/login/
+                    Username : {user.username}
+                    Thank you!
+                    Team StudentMS""",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Email failed: {e}")  # don't break registration if email fails
 
             return redirect('login')
 
