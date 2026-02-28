@@ -2,9 +2,15 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from student.models import Student
+from django.core.validators import RegexValidator
 
 
 class RegisterForm(UserCreationForm):
+
+    phone_validator = RegexValidator(
+    regex=r'^\d{10}$',
+    message="Phone number must be exactly 10 digits."
+    )
 
     first_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -48,9 +54,15 @@ class RegisterForm(UserCreationForm):
     )
 
     phone_number = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+    required=False,
+    max_length=10,
+    validators=[phone_validator],
+    widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter 10 digit phone number'
+    })
     )
+    
 
     profile_picture = forms.ImageField(
         required=False,
@@ -81,7 +93,7 @@ class RegisterForm(UserCreationForm):
             'password2'
         ]
 
-    # ✅ Email Validation
+    # Email Validation
     def clean_email(self):
         email = self.cleaned_data.get('email')
 
@@ -90,7 +102,7 @@ class RegisterForm(UserCreationForm):
 
         return email
 
-    # ✅ Save Method
+    # Save Method
     def save(self, commit=True):
         user = super().save(commit=False)
 

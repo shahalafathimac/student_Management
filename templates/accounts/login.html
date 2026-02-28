@@ -1,90 +1,84 @@
 {% extends 'accounts/base.html' %}
 {% block content %}
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-light bg-white shadow-sm px-4">
-    <div class="container-fluid">
-
-        <!-- Brand -->
-        <span class="navbar-brand fw-bold text-primary">
-            studentMs
-        </span>
-
-        <!-- Register Link -->
-        <div>
-            <span class="text-muted">Don't have an account?</span>
-            <a href="{% url 'register' %}" class="fw-semibold text-decoration-none ms-1">
-                Register
-            </a>
-        </div>
-
+<!-- Floating Navbar -->
+<nav class="absolute top-4 left-4 right-4 max-w-7xl mx-auto bg-white/90 backdrop-blur-xl rounded-full shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-white flex items-center justify-between px-6 py-4 sm:px-8 z-50">
+    <span class="text-xl font-extrabold text-black tracking-tight flex items-center">
+        StudentMS
+    </span>
+    <div class="text-sm font-medium flex items-center">
+        <span class="text-gray-400 hidden sm:inline">Don't have an account?</span>
+        <a href="{% url 'register' %}" class="text-black font-extrabold hover:underline ml-2">
+            Register
+        </a>
     </div>
 </nav>
 
-
 <!-- LOGIN SECTION -->
-<div class="container d-flex justify-content-center align-items-center"
-     style="min-height: 85vh;">
+<div class="min-h-screen flex items-center justify-center p-4 pt-24 pb-12">
 
-    <div class="card shadow-lg border-0 p-5" style="width: 100%; max-width: 450px;">
+    <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white w-full max-w-md relative overflow-hidden">
 
         <!-- Title -->
-        <div class="text-center mb-4">
-            <h2 class="fw-bold">Welcome Back</h2>
-            <p class="text-muted">
+        <div class="mb-8 text-center">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-100 shadow-sm">
+                <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome Back</h2>
+            <p class="text-sm text-gray-500 font-medium mt-3 leading-relaxed">
                 Please enter your details to sign in.
             </p>
         </div>
 
         <!-- FORM -->
-        <form method="POST">
+        <form method="POST" class="space-y-6">
             {% csrf_token %}
 
             <!-- Email -->
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
+            <div>
+                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">
                     Email Address
                 </label>
                 <input type="email"
                        name="username"
-                       class="form-control form-control-lg"
+                       class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-4 text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all placeholder-gray-400"
                        placeholder="student@university.edu"
                        required>
             </div>
 
             <!-- Password -->
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
+            <div>
+                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2.5 ml-1">
                     Password
                 </label>
                 <input type="password"
                        name="password"
-                       class="form-control form-control-lg"
-                       placeholder="Enter password"
+                       class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-4 text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all placeholder-gray-400"
+                       placeholder="••••••••"
                        required>
             </div>
 
             <!-- Remember + Forgot -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox">
-                    <label class="form-check-label">
+            <div class="flex justify-between items-center mt-2">
+                <div class="flex items-center space-x-2.5">
+                    <input class="w-4 h-4 rounded border-gray-300 accent-black cursor-pointer" type="checkbox" id="rememberMe">
+                    <label for="rememberMe" class="text-xs font-bold text-gray-500 cursor-pointer">
                         Remember me
                     </label>
                 </div>
 
-                <a href="#" class="text-decoration-none">
+                <a href="{% url 'forgot_password' %}" class="text-xs text-black font-extrabold hover:underline">
                     Forgot password?
                 </a>
             </div>
 
             <!-- Submit Button -->
-            <div class="d-grid">
-                <button type="submit"
-                        class="btn btn-primary btn-lg">
-                    Sign In
-                </button>
-            </div>
+            <button type="submit"
+                    class="w-full mt-2 bg-black text-white py-4 rounded-2xl text-sm font-bold shadow-[0_4px_14px_0_rgb(0,0,0,0.39)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.23)] hover:bg-gray-800 hover:-translate-y-0.5 transition-all duration-200">
+                Sign In
+            </button>
 
         </form>
 

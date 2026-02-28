@@ -69,7 +69,7 @@ def purchase_courses(request):
     for course in courses:
         course.purchase_status = purchase_map.get(course.id)
 
-    # Fetch distinct departments directly from DB — no hardcoding
+    # Fetch distinct departments directly from DB 
     departments = Course.objects.values_list('department', flat=True).distinct().order_by('department')
 
     if request.method == 'POST':
@@ -107,7 +107,7 @@ def purchase_courses(request):
 
     return render(request, 'student/purchase_courses.html', {
         'courses':     courses,
-        'departments': departments,   # ← pass to template
+        'departments': departments,  
     })
 
 
@@ -119,7 +119,7 @@ def edit_profile(request):
         user_form    = UserUpdateForm(request.POST, instance=request.user)
         student_form = StudentProfileForm(
             request.POST,
-            request.FILES,      # ← required so profile_picture uploads work
+            request.FILES,      # profile_picture uploads work
             instance=student
         )
 
@@ -127,7 +127,7 @@ def edit_profile(request):
             user_form.save()
             student_form.save()
             messages.success(request, 'Profile updated successfully.')
-            return redirect('student_profile')   # send back to profile page
+            return redirect('student_profile')  
         else:
             messages.error(request, 'Please fix the errors below.')
     else:
@@ -137,33 +137,4 @@ def edit_profile(request):
     return render(request, 'student/edit_profile.html', {
         'user_form':    user_form,
         'student_form': student_form,
-    })
-
-
-@role_required(['student'])
-def search_courses(request):
-    query   = request.GET.get('q', '').strip()
-    student = get_object_or_404(Student, user=request.user)
-
-    courses = Course.objects.all()
-    if query:
-        courses = courses.filter(
-            Q(title__icontains=query) |
-            Q(description__icontains=query) |
-            Q(department__icontains=query)
-        )
-
-    purchase_map = {
-        p.course_id: p.status
-        for p in CoursePurchase.objects.filter(student=student).only('course_id', 'status')
-    }
-    for course in courses:
-        course.purchase_status = purchase_map.get(course.id)
-
-    departments = Course.objects.values_list('department', flat=True).distinct().order_by('department')
-
-    return render(request, 'student/search_results.html', {
-        'courses':     courses,
-        'query':       query,
-        'departments': departments, 
     })

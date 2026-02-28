@@ -56,15 +56,12 @@ def manage_courses(request):
     return render(request, 'principal/manage_courses.html', {
         'courses':     courses,
         'form':        form,
-        'departments': departments,   # ← for the filter dropdown
+        'departments': departments,  
     })
 
 @role_required(['principal'])
 def edit_course(request, pk):
-    """
-    GET  → pre-fill form with existing course data
-    POST → validate & save changes, then redirect
-    """
+    
     course = get_object_or_404(Course, pk=pk)
     form = CourseForm(instance=course)           # pre-populate on GET
 
@@ -84,10 +81,7 @@ def edit_course(request, pk):
 
 @role_required(['principal'])
 def delete_course(request, pk):
-    """
-    POST only → delete course and redirect.
-    GET requests are silently redirected back (no accidental deletes from URL bar).
-    """
+    
     course = get_object_or_404(Course, pk=pk)
 
     if request.method == 'POST':
@@ -116,7 +110,7 @@ def manage_students(request):
     if dept_filter:
         students = students.filter(department=dept_filter)
 
-    from principal.models import Course  # reuse DEPARTMENT_CHOICES
+     
     departments = Course.DEPARTMENT_CHOICES
 
     return render(request, 'principal/manage_students.html', {

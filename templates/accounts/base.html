@@ -1,24 +1,55 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Management System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Management System{% endblock %} | SMS</title>
 
-    <!-- Bootstrap 5 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom Theme Styles -->
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f6f8fd;
+            /* Premium pastel radial gradient matching the Principal Panel */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(199,100%,89%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(339,100%,92%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(78,100%,89%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(140,100%,89%,1) 0, transparent 50%), 
+                radial-gradient(at 0% 100%, hsla(28,100%,89%,1) 0, transparent 50%);
+            background-attachment: fixed;
+        }
+        
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #E4E4E7; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4D4D8; }
+    </style>
 </head>
-<body class="bg-light">
+<body class="text-[#111827] antialiased min-h-screen relative flex flex-col overflow-x-hidden">
 
-{% block content %}
-{% endblock %}
+    <!-- Main Content Block -->
+    <main class="relative z-10 flex-grow">
+        {% block content %}
+        {% endblock %}
+    </main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modern Floating Footer -->
+    <footer class="absolute bottom-6 left-0 w-full text-center pointer-events-none z-0">
+        <p class="text-[12px] font-bold text-gray-400 uppercase tracking-widest pointer-events-auto">
+            © {% now "Y" %} Student Management System
+        </p>
+    </footer>
+
 </body>
-<!-- FOOTER -->
-<footer class="bg-white text-center py-3 border-top">
-    <small class="text-muted">
-        © 2024 Student Management System. All rights reserved.
-    </small>
-</footer>
 </html>

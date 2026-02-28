@@ -4,7 +4,7 @@
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    <!-- TOP LEFT: Small Stat 1 -->
+    <!-- TOP LEFT -->
     <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
         <div class="flex justify-between items-start mb-6">
             <h3 class="text-gray-800 font-bold text-lg">Approved<br>Courses</h3>
@@ -19,7 +19,7 @@
         <p class="text-xs text-gray-400 font-medium mt-4">Total courses successfully approved.</p>
     </div>
 
-    <!-- TOP MIDDLE: Small Stat 2 -->
+    <!-- TOP MIDDLE -->
     <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
         <div class="flex justify-between items-start mb-6">
             <h3 class="text-gray-800 font-bold text-lg">Pending<br>Requests</h3>
@@ -34,7 +34,7 @@
         <p class="text-xs text-gray-400 font-medium mt-4">Awaiting administrative approval.</p>
     </div>
 
-    <!-- TOP RIGHT: Large Stat (Total Spent) -->
+    <!-- TOP RIGHT:Total Spent -->
     <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-white flex flex-col justify-between">
         <div class="flex justify-between items-start mb-6">
             <h3 class="text-gray-800 font-bold text-lg">Financial<br>Overview</h3>
@@ -54,14 +54,14 @@
         </div>
     </div>
 
-   <!-- BOTTOM LEFT: Tasks/Approved List -->
+   <!-- BOTTOM LEFT:Approved List -->
     <div class="lg:col-span-2 bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white flex flex-col">
         
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-black">My Courses</h2>
         </div>
 
-        <!-- Filter Pills -->
+        <!-- Filter -->
         <div class="flex space-x-3 mb-8">
 
             <a href="?status=approved"
@@ -164,17 +164,17 @@
                     {{ request.user.first_name }}
                 </span>
             </div>
-            <!-- Row -->
+            
             <div class="grid grid-cols-3 gap-4 items-center border-b border-gray-100 pb-4">
                 <span class="col-span-1 text-sm font-bold text-gray-400">Email</span>
                 <span class="col-span-2 text-sm font-bold text-gray-900 truncate">{{ request.user.email }}</span>
             </div>
-            <!-- Row -->
+            
             <div class="grid grid-cols-3 gap-4 items-center border-b border-gray-100 pb-4">
                 <span class="col-span-1 text-sm font-bold text-gray-400">Dept</span>
                 <span class="col-span-2 text-sm font-bold text-gray-900">{{ request.user.student.department }}</span>
             </div>
-            <!-- Row -->
+            
             <div class="grid grid-cols-3 gap-4 items-center">
                 <span class="col-span-1 text-sm font-bold text-gray-400">Age</span>
                 <span class="col-span-2 text-sm font-bold text-gray-900">{{ request.user.student.age }} y/o</span>
