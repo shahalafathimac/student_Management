@@ -2,15 +2,15 @@
 {% block title %}Edit Student{% endblock %}
 
 {% block content %}
-<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white max-w-2xl mx-auto">
+<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-5 sm:p-8 shadow-sm border border-white max-w-2xl mx-auto">
 
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-8">
         <div>
             <h2 class="text-2xl font-extrabold text-black">Edit Student</h2>
             <p class="text-sm text-gray-400 font-medium mt-1">Update student profile information.</p>
         </div>
         <a href="{% url 'manage_students' %}"
-           class="border border-gray-200 text-gray-500 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+            class="border border-gray-200 text-gray-500 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
             Cancel
         </a>
     </div>
@@ -33,7 +33,7 @@
         {% for field in form %}
         <div>
             <label for="{{ field.id_for_label }}"
-                   class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
                 {{ field.label }}
             </label>
             <div class="[&>input]:w-full [&>input]:border [&>input]:border-gray-200
@@ -57,7 +57,8 @@
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
                 Email
             </label>
-            <div class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-400 cursor-not-allowed">
+            <div
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-400 cursor-not-allowed">
                 {{ student.user.email }}
             </div>
             <p class="text-xs text-gray-400 mt-1">Email cannot be changed.</p>
@@ -65,7 +66,7 @@
 
         <div class="pt-2">
             <button type="submit"
-                    class="w-full bg-black text-white py-3 rounded-xl text-sm font-bold hover:bg-gray-800 transition">
+                class="w-full bg-black text-white py-3 rounded-xl text-sm font-bold hover:bg-gray-800 transition">
                 Save Changes
             </button>
         </div>

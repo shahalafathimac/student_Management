@@ -2,49 +2,32 @@
 {% block title %}Course Approvals{% endblock %}
 
 {% block content %}
-<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-8 shadow-sm border border-white h-full flex flex-col">
+<div class="bg-white/90 backdrop-blur-xl rounded-[2rem] p-5 lg:p-8 shadow-sm border border-white h-full flex flex-col">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 lg:mb-6">
         <div>
-            <h2 class="text-2xl font-extrabold text-black">Course Approvals</h2>
+            <h2 class="text-xl lg:text-2xl font-extrabold text-black">Course Approvals</h2>
             <p class="text-sm text-gray-400 font-medium mt-1">Review and manage student course enrollments.</p>
         </div>
-        <span id="resultCount" class="bg-[#FFD384] text-orange-900 text-xs font-bold px-4 py-2 rounded-full">
+        <span id="resultCount" class="bg-[#FFD384] text-orange-900 text-xs font-bold px-4 py-2 rounded-full self-start sm:self-auto">
             {{ pending_requests|length }} Request{{ pending_requests|length|pluralize }}
         </span>
     </div>
 
-    <!-- Messages -->
     {% if messages %}
     <div class="mb-4 space-y-2">
         {% for msg in messages %}
-        <div class="px-5 py-3 rounded-2xl text-sm font-semibold
-            {% if msg.tags == 'success' %}bg-[#B5FF9D]/40 text-green-900
-            {% else %}bg-red-100 text-red-800{% endif %}">
-            {{ msg }}
-        </div>
+        <div class="px-5 py-3 rounded-2xl text-sm font-semibold {% if msg.tags == 'success' %}bg-[#B5FF9D]/40 text-green-900{% else %}bg-red-100 text-red-800{% endif %}">{{ msg }}</div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Search + Filter Bar -->
-    <div class="flex flex-col sm:flex-row gap-3 mb-6">
-
+    <div class="flex flex-col sm:flex-row gap-2 lg:gap-3 mb-5 lg:mb-6">
         <div class="relative flex-1">
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input id="approvalSearch"
-                   type="text"
-                   placeholder="Search by student, course, or department..."
-                   class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3 text-sm font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="approvalSearch" type="text" placeholder="Search by student or course..." class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3 text-sm font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
         </div>
-
-        <select id="statusFilter"
-                class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
+        <select id="statusFilter" class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 transition">
             <option value="">All Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
@@ -52,129 +35,103 @@
         </select>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto border border-gray-100 rounded-2xl flex-1">
-        <table class="w-full text-left whitespace-nowrap">
+    <!-- Mobile: Card Layout / Desktop: Table -->
+    <!-- Desktop Table -->
+    <div class="hidden md:block overflow-x-auto border border-gray-100 rounded-2xl flex-1">
+        <table class="w-full text-left" style="min-width:600px">
             <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
                     <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Student</th>
                     <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Course</th>
-                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Dept</th>
-                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Price</th>
-                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest hidden lg:table-cell">Dept</th>
+                    <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest hidden lg:table-cell">Date</th>
                     <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
                     <th class="p-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Actions</th>
                 </tr>
             </thead>
             <tbody id="approvalTableBody" class="divide-y divide-gray-50">
                 {% for req in pending_requests %}
-                <tr class="approval-row hover:bg-gray-50 transition"
-                    data-search="{{ req.student.user.first_name|lower }} {{ req.student.user.last_name|lower }} {{ req.student.user.email|lower }} {{ req.course.title|lower }} {{ req.course.department|lower }}"
-                    data-status="{{ req.status|lower }}">
-
+                <tr class="approval-row hover:bg-gray-50 transition" data-search="{{ req.student.user.first_name|lower }} {{ req.student.user.last_name|lower }} {{ req.course.title|lower }}" data-status="{{ req.status|lower }}">
                     <td class="p-5">
-                        <p class="font-extrabold text-gray-900">
-                            {{ req.student.user.first_name }} {{ req.student.user.last_name }}
-                        </p>
-                        <p class="text-xs text-gray-400 font-medium mt-0.5">{{ req.student.user.email }}</p>
+                        <p class="font-extrabold text-gray-900 text-sm">{{ req.student.user.first_name }} {{ req.student.user.last_name }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ req.student.user.email }}</p>
                     </td>
-
                     <td class="p-5 text-sm font-bold text-gray-800">{{ req.course.title }}</td>
-
-                    <td class="p-5">
-                        <span class="bg-[#FFD384]/30 text-orange-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                            {{ req.course.department }}
-                        </span>
+                    <td class="p-5 hidden lg:table-cell">
+                        <span class="bg-[#FFD384]/30 text-orange-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">{{ req.course.department }}</span>
                     </td>
-
-                    <td class="p-5 text-sm font-extrabold text-gray-900">₹{{ req.course.price }}</td>
-
-                    <td class="p-5 text-sm text-gray-500 font-medium">{{ req.created_at|date:"d M Y" }}</td>
-
-                    <!-- Status badge -->
+                    <td class="p-5 text-sm text-gray-500 font-medium hidden lg:table-cell">{{ req.created_at|date:"d M Y" }}</td>
                     <td class="p-5 text-center">
-                        {% if req.status == "Pending" %}
-                            <span class="bg-[#FFD384] text-orange-900 px-3 py-1.5 rounded-full text-xs font-bold">⏳ Pending</span>
-                        {% elif req.status == "Approved" %}
-                            <span class="bg-[#B5FF9D] text-green-900 px-3 py-1.5 rounded-full text-xs font-bold">✓ Approved</span>
-                        {% else %}
-                            <span class="bg-[#FF9D9D] text-red-900 px-3 py-1.5 rounded-full text-xs font-bold">✕ Rejected</span>
-                        {% endif %}
+                        {% if req.status == "Pending" %}<span class="bg-[#FFD384] text-orange-900 px-3 py-1.5 rounded-full text-xs font-bold">⏳ Pending</span>
+                        {% elif req.status == "Approved" %}<span class="bg-[#B5FF9D] text-green-900 px-3 py-1.5 rounded-full text-xs font-bold">✓ Approved</span>
+                        {% else %}<span class="bg-[#FF9D9D] text-red-900 px-3 py-1.5 rounded-full text-xs font-bold">✕ Rejected</span>{% endif %}
                     </td>
-
-                    <!-- Actions -->
                     <td class="p-5 text-center">
                         {% if req.status == "Pending" %}
                         <div class="flex justify-center space-x-2">
-                            <form method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="request_id" value="{{ req.id }}">
-                                <input type="hidden" name="action"     value="approve">
-                                <button type="submit"
-                                        class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition shadow-sm">
-                                    Approve
-                                </button>
-                            </form>
-                            <form method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="request_id" value="{{ req.id }}">
-                                <input type="hidden" name="action"     value="reject">
-                                <button type="submit"
-                                        class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">
-                                    Reject
-                                </button>
-                            </form>
+                            <form method="POST">{% csrf_token %}<input type="hidden" name="request_id" value="{{ req.id }}"><input type="hidden" name="action" value="approve"><button type="submit" class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition">Approve</button></form>
+                            <form method="POST">{% csrf_token %}<input type="hidden" name="request_id" value="{{ req.id }}"><input type="hidden" name="action" value="reject"><button type="submit" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">Reject</button></form>
                         </div>
-                        {% else %}
-                        <span class="text-gray-300 text-xs font-bold">—</span>
-                        {% endif %}
+                        {% else %}<span class="text-gray-300 text-xs font-bold">—</span>{% endif %}
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center p-10 text-gray-400 font-medium">
-                        No course approval requests found.
-                    </td>
-                </tr>
+                <tr><td colspan="6" class="text-center p-10 text-gray-400 font-medium">No course approval requests found.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
-
-        <div id="noResults" class="hidden text-center p-10 text-gray-400 font-medium">
-            No requests match your search.
-        </div>
     </div>
 
+    <!-- Mobile: Card List -->
+    <div class="md:hidden flex-1 overflow-y-auto space-y-3">
+        {% for req in pending_requests %}
+        <div class="approval-row-mobile border border-gray-100 rounded-2xl p-4 bg-gray-50/50" data-search="{{ req.student.user.first_name|lower }} {{ req.student.user.last_name|lower }} {{ req.course.title|lower }}" data-status="{{ req.status|lower }}">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <p class="font-extrabold text-gray-900 text-sm">{{ req.student.user.first_name }} {{ req.student.user.last_name }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ req.course.title }}</p>
+                </div>
+                {% if req.status == "Pending" %}<span class="bg-[#FFD384] text-orange-900 px-2.5 py-1 rounded-full text-[10px] font-bold">Pending</span>
+                {% elif req.status == "Approved" %}<span class="bg-[#B5FF9D] text-green-900 px-2.5 py-1 rounded-full text-[10px] font-bold">Approved</span>
+                {% else %}<span class="bg-[#FF9D9D] text-red-900 px-2.5 py-1 rounded-full text-[10px] font-bold">Rejected</span>{% endif %}
+            </div>
+            {% if req.status == "Pending" %}
+            <div class="flex gap-2 mt-3">
+                <form method="POST" class="flex-1">{% csrf_token %}<input type="hidden" name="request_id" value="{{ req.id }}"><input type="hidden" name="action" value="approve"><button type="submit" class="w-full bg-black text-white py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition">Approve</button></form>
+                <form method="POST" class="flex-1">{% csrf_token %}<input type="hidden" name="request_id" value="{{ req.id }}"><input type="hidden" name="action" value="reject"><button type="submit" class="w-full bg-white border border-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">Reject</button></form>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-center text-gray-400 font-medium py-10">No requests found.</p>
+        {% endfor %}
+    </div>
+
+    <div id="noResults" class="hidden text-center p-10 text-gray-400 font-medium">No requests match your search.</div>
 </div>
 
 {% block scripts %}
 <script>
-    const searchInput  = document.getElementById('approvalSearch');
+    const searchInput = document.getElementById('approvalSearch');
     const statusFilter = document.getElementById('statusFilter');
-    const noResults    = document.getElementById('noResults');
-    const countBadge   = document.getElementById('resultCount');
-
+    const noResults = document.getElementById('noResults');
+    const countBadge = document.getElementById('resultCount');
     function filterRows() {
-        const term   = searchInput.value.toLowerCase().trim();
+        const term = searchInput.value.toLowerCase().trim();
         const status = statusFilter.value.toLowerCase();
-        const rows   = document.querySelectorAll('.approval-row');
-        let visible  = 0;
-
-        rows.forEach(row => {
-            const matchSearch = !term   || row.dataset.search.includes(term);
-            const matchStatus = !status || row.dataset.status === status;
-            const show = matchSearch && matchStatus;
+        const desktopRows = document.querySelectorAll('.approval-row');
+        const mobileRows = document.querySelectorAll('.approval-row-mobile');
+        let visible = 0;
+        [...desktopRows, ...mobileRows].forEach(row => {
+            const show = (!term || row.dataset.search.includes(term)) && (!status || row.dataset.status === status);
             row.style.display = show ? '' : 'none';
-            if (show) visible++;
+            if (show && row.classList.contains('approval-row')) visible++;
+            else if (show && row.classList.contains('approval-row-mobile') && window.innerWidth < 768) visible++;
         });
-
-        noResults.classList.toggle('hidden', visible > 0);
-        countBadge.textContent = visible + ' Request' + (visible !== 1 ? 's' : '');
+        countBadge.textContent = (desktopRows.length > 0 ? [...desktopRows].filter(r => r.style.display !== 'none').length : [...mobileRows].filter(r => r.style.display !== 'none').length) + ' Request(s)';
     }
-
-    searchInput.addEventListener('input',   filterRows);
+    searchInput.addEventListener('input', filterRows);
     statusFilter.addEventListener('change', filterRows);
 </script>
 {% endblock %}
-
 {% endblock %}
