@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 def home(request):
     return render(request, 'home.html')
 
+
 def register(request):
     if request.method == "POST":
         form = RegisterForm(request.POST, request.FILES)
@@ -22,28 +23,36 @@ def register(request):
             user.role = 'student'
             user.save()
 
-             # Send welcome email
+            # ✅ Create the Student record linked to this user
+            Student.objects.create(
+                user=user,
+                reg_number=form.cleaned_data.get('reg_number', ''),
+                department=form.cleaned_data.get('department', ''),
+                year_of_admission=form.cleaned_data.get('year_of_admission', 2024),
+                phone_number=form.cleaned_data.get('phone_number', ''),
+                age=form.cleaned_data.get('age', None),
+            )
+
+            # Send welcome email
             try:
                 send_mail(
                     subject='Welcome to Student Management System',
                     message=f"""Hello {user.first_name or user.username},
-                    Your account has been successfully created.
-                    Login here: http://127.0.0.1:8000/accounts/login/
-                    Username : {user.username}
-                    Thank you!
-                    Team StudentMS""",
+Your account has been successfully created.
+Login here: http://127.0.0.1:8000/accounts/login/
+Username : {user.username}
+Thank you!
+Team StudentMS""",
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
                     fail_silently=False,
                 )
             except Exception as e:
-                print(f"Email failed: {e}")  # don't break registration if email fails
+                print(f"Email failed: {e}")
 
             return redirect('login')
-
         else:
             print("ERRORS:", form.errors)
-
     else:
         form = RegisterForm()
 
