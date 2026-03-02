@@ -7,7 +7,6 @@ django-cloudinary-storage==0.3.0
 django-tailwind==4.4.2
 idna==3.11
 pillow==12.1.1
-psycopg2==2.9.11
 psycopg2-binary==2.9.11
 pytailwindcss==0.3.0
 python-decouple==3.8
