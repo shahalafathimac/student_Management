@@ -20,8 +20,8 @@
         </div>
 
         <h2 class="text-2xl font-extrabold text-black">{{ request.user.first_name }} {{ request.user.last_name }}</h2>
-        <p class="text-sm font-bold text-gray-400 mt-2 tracking-wide uppercase">Student • {{
-            request.user.student.department }}</p>
+        <p class="text-sm font-bold text-gray-400 mt-2 tracking-wide uppercase">Student • 
+            {{ request.user.student.department }}</p>
 
         <div class="w-full h-px bg-gray-100 my-8"></div>
 
@@ -32,8 +32,8 @@
             </div>
             <div class="flex justify-between items-center bg-gray-50 px-5 py-4 rounded-2xl">
                 <span class="text-gray-500 text-sm font-semibold">Email</span>
-                <span class="text-black font-extrabold text-sm truncate max-w-[150px] sm:max-w-[200px]">{{
-                    request.user.email }}</span>
+                <span class="text-black font-extrabold text-sm truncate max-w-[150px] sm:max-w-[200px]">
+                    {{ request.user.email }}</span>
             </div>
         </div>
 
@@ -60,7 +60,7 @@
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">First
                         Name</label>
-                    <p class="text-black font-extrabold text-lg">{{ student.user.first_name }}</p>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.first_name }}</p>
                 </div>
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Last
@@ -75,8 +75,8 @@
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Phone
                         Number</label>
-                    <p class="text-black font-extrabold text-lg">{{ request.user.student.phone_number|default:"Not
-                        Provided" }}</p>
+                    <p class="text-black font-extrabold text-lg">
+                        {{ request.user.student.phone_number|default:"Not Provided" }}</p>
                 </div>
             </div>
         </div>
@@ -97,7 +97,7 @@
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label
                         class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Department</label>
-                    <p class="text-black font-extrabold text-lg">{{ student.department }}</p>
+                    <p class="text-black font-extrabold text-lg">{{ request.user.student.department }}</p>
                 </div>
                 <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <label class="block text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Admission
